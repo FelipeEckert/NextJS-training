@@ -26,7 +26,10 @@ export async function getQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number 
   cacheTag("quotes"); // a label, so we can throw away this cache on demand
 
   const pairs = currencies.map((c) => c.pair).join(",");
-  const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pairs}`);
+  // Fail fast if AwesomeAPI hangs, instead of hanging our page with it
+  const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pairs}`, {
+    signal: AbortSignal.timeout(5000),
+  });
 
   if (!res.ok) throw new Error(`AwesomeAPI responded ${res.status}`);
 

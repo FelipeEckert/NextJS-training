@@ -17,8 +17,15 @@ export async function getFavorites(): Promise<string[]> {
   return [...new Set(valid)];
 }
 
+// Idempotent: it receives the desired state, not "flip it".
+// Running it once or ten times (e.g. a retry on a bad network) gives the same result
 // Only works inside a Server Action or Route Handler (they can send Set-Cookie headers)
-export async function saveFavorites(pairs: string[]) {
+export async function setFavorite(pair: string, favorite: boolean) {
+  const others = (await getFavorites()).filter((p) => p !== pair);
+  await saveFavorites(favorite ? [...others, pair] : others);
+}
+
+async function saveFavorites(pairs: string[]) {
   (await cookies()).set(COOKIE_NAME, pairs.join(","), {
     httpOnly: true, // browser JavaScript can't read it, so an XSS attack can't steal it
     secure: process.env.NODE_ENV === "production", // HTTPS only in production (localhost is HTTP)

@@ -1,7 +1,7 @@
 "use client"; // ← the boundary: from here down, this also runs in the browser
 
 import { useOptimistic } from "react";
-import { toggleFavorite } from "@/app/actions";
+import { setFavoriteAction } from "@/app/actions";
 
 type FavoriteButtonProps = {
   pair: string;
@@ -14,8 +14,9 @@ export function FavoriteButton({ pair, isFavorite }: FavoriteButtonProps) {
   const [optimisticFavorite, setOptimisticFavorite] = useOptimistic(isFavorite);
 
   async function toggle() {
-    setOptimisticFavorite(!optimisticFavorite);
-    await toggleFavorite(pair);
+    const next = !optimisticFavorite; // decide the new state here, on the client...
+    setOptimisticFavorite(next);
+    await setFavoriteAction(pair, next); // ...and send it, so a retry can't flip it back
   }
 
   return (
