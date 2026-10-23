@@ -14,6 +14,7 @@ type ApiResponse = Record<string, { bid: string; pctChange: string; create_date:
 
 // One upstream call per minute no matter which pairs callers ask for, so callers can't bypass the cache
 async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }> {
+  // shortcut: default "use cache" lives in each server instance's memory, so on serverless (Vercel) each instance calls the API on its own; switch to "use cache: remote" when traffic grows
   "use cache";
   cacheLife("minutes"); // at most one API call per minute, no matter how many visitors
   cacheTag("quotes"); // a label, so we can throw away this cache on demand

@@ -4,6 +4,7 @@ import { type PricePoint, parseHistory } from "./analysis";
 
 // Daily closes for up to a year. Cached for hours, since a daily chart changes slowly
 export async function getHistory(pair: string): Promise<PricePoint[]> {
+  // shortcut: default "use cache" lives in each server instance's memory, so on serverless (Vercel) each instance calls the API on its own; switch to "use cache: remote" when traffic grows
   "use cache";
   cacheLife("hours");
   cacheTag("history");
