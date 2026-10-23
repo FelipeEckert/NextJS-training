@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Only the requested pairs are fetched; no pairs means the featured set
+    // One cached fetch covers all pairs, then we filter it to the requested ones (none means the featured set)
     const { quotes, fetchedAt } = await getQuotes(requested?.length ? requested : undefined);
     return Response.json({ data: quotes, fetchedAt: new Date(fetchedAt).toISOString() });
   } catch (error) {
