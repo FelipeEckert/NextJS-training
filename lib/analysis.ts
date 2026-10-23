@@ -6,7 +6,7 @@ export type PricePoint = { date: string; close: number }; // date = UTC YYYY-MM-
 
 export type Range = "7D" | "1M" | "3M" | "1Y";
 export const RANGES: Range[] = ["7D", "1M", "3M", "1Y"];
-export const RANGE_DAYS: Record<Range, number> = { "7D": 7, "1M": 30, "3M": 90, "1Y": 360 };
+export const RANGE_DAYS: Record<Range, number> = { "7D": 7, "1M": 30, "3M": 90, "1Y": 365 };
 
 export function parseRange(value: string | undefined): Range {
   return RANGES.find((r) => r === value) ?? "1M";
@@ -38,7 +38,11 @@ export function parseHistory(json: unknown): PricePoint[] {
 }
 
 export function sliceRange(points: PricePoint[], range: Range): PricePoint[] {
-  return points.slice(-RANGE_DAYS[range]);
+  if (points.length === 0) return [];
+  // Count calendar days, not points: fiat has no weekend points, so 360 points would span ~14 months
+  const last = points[points.length - 1];
+  const cutoff = new Date(Date.parse(last.date) - RANGE_DAYS[range] * 86_400_000).toISOString().slice(0, 10);
+  return points.filter((p) => p.date > cutoff);
 }
 
 export type Summary = {
