@@ -1,4 +1,4 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type Quote = {
   pair: string;
@@ -20,9 +20,10 @@ export const currencies = [
 // Only the response fields we use. Numbers arrive as strings
 type ApiResponse = Record<string, { bid: string; pctChange: string; create_date: string }>;
 
-export async function getQuotes(): Promise<Quote[]> {
+export async function getQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }> {
   "use cache";
   cacheLife("minutes"); // at most one API call per minute, no matter how many visitors
+  cacheTag("quotes"); // a label, so we can throw away this cache on demand
 
   const pairs = currencies.map((c) => c.pair).join(",");
   const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pairs}`);
@@ -31,7 +32,7 @@ export async function getQuotes(): Promise<Quote[]> {
 
   const data: ApiResponse = await res.json();
 
-  return currencies.map((c) => {
+  const quotes = currencies.map((c) => {
     const d = data[c.pair.replace("-", "")]; // the API keys are "USDBRL", without the hyphen
     return {
       ...c,
@@ -40,9 +41,12 @@ export async function getQuotes(): Promise<Quote[]> {
       updatedAt: d.create_date,
     };
   });
+
+  // Saved inside the cache, so it tells us when the API was last called
+  return { quotes, fetchedAt: Date.now() };
 }
 
 export async function getQuote(pair: string) {
-  const quotes = await getQuotes(); // reuses the cache: no extra API call
+  const { quotes } = await getQuotes(); // reuses the cache: no extra API call
   return quotes.find((q) => q.pair === pair.toUpperCase());
 }

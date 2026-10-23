@@ -1,0 +1,19 @@
+"use client"; // error boundaries must be Client Components (the button needs a click)
+
+export default function ErrorPage({ retry }: { error: unknown; retry: () => void }) {
+  return (
+    <main className="mx-auto w-full max-w-5xl p-8">
+      <h1 className="text-2xl font-bold">Couldn&apos;t load exchange rates</h1>
+      <p className="mt-2 text-zinc-500">
+        The data source didn&apos;t respond. Please try again in a moment.
+      </p>
+      <button
+        type="button"
+        onClick={() => retry()}
+        className="mt-4 rounded-lg bg-zinc-900 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-900"
+      >
+        Try again
+      </button>
+    </main>
+  );
+}
