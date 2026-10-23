@@ -26,7 +26,7 @@ export function CurrencySearch({ currencies }: { currencies: Currency[] }) {
       {/* role="status" lets screen readers announce the new count as the query changes */}
       {/* One text node (template string), so the count reads as "52 currencies" in the HTML */}
       <p role="status" className="mt-3 text-sm text-zinc-500">
-        {`${matches.length} currencies`}
+        {`${matches.length} ${matches.length === 1 ? "currency" : "currencies"}`}
       </p>
 
       {matches.length === 0 ? (
