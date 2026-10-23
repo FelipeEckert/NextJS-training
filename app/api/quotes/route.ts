@@ -1,4 +1,5 @@
-import { currencies, getQuotes } from "@/lib/quotes";
+import { currencies } from "@/lib/currencies";
+import { getQuotes } from "@/lib/quotes";
 
 // GET /api/quotes                        → all quotes
 // GET /api/quotes?pairs=USD-BRL,EUR-BRL  → only those pairs

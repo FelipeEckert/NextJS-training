@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { currencies } from "./currencies";
 
 export type Quote = {
   pair: string;
@@ -7,15 +8,6 @@ export type Quote = {
   change: number;
   updatedAt: string;
 };
-
-// Pairs the dashboard supports. Also an allowlist:
-// we never forward a pair to the external API unless it is listed here
-export const currencies = [
-  { pair: "USD-BRL", currency: "US Dollar (USD)" },
-  { pair: "EUR-BRL", currency: "Euro (EUR)" },
-  { pair: "BTC-BRL", currency: "Bitcoin (BTC)" },
-  { pair: "GBP-BRL", currency: "British Pound (GBP)" },
-];
 
 // Only the response fields we use. Numbers arrive as strings
 type ApiResponse = Record<string, { bid: string; pctChange: string; create_date: string }>;

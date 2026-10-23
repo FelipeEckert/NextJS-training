@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { currencies } from "./quotes";
+import { PAIRS } from "./currencies";
 
 const COOKIE_NAME = "favorites";
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
 // A valid favorite is any pair from the allowlist, and nothing else
-export const PairSchema = z.enum(currencies.map((c) => c.pair) as [string, ...string[]]);
+export const PairSchema = z.enum(PAIRS as [string, ...string[]]);
 
 export async function getFavorites(): Promise<string[]> {
   const raw = (await cookies()).get(COOKIE_NAME)?.value ?? "";

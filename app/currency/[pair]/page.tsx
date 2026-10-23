@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FavoriteStar } from "@/components/FavoriteStar";
 import { formatBRL } from "@/lib/format";
-import { currencies, getQuote } from "@/lib/quotes";
+import { currencies } from "@/lib/currencies";
+import { getQuote } from "@/lib/quotes";
 
 // Tells Next which pairs exist, so it prerenders these pages at build time
 export function generateStaticParams() {
