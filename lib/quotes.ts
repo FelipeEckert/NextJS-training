@@ -19,16 +19,25 @@ async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }>
   cacheTag("quotes"); // a label, so we can throw away this cache on demand
 
   // Fail fast if AwesomeAPI hangs, instead of hanging our page with it
-  const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${PAIRS.join(",")}`, {
-    signal: AbortSignal.timeout(5000),
-  });
+  const fetchPairs = (pairs: string[]) =>
+    fetch(`https://economia.awesomeapi.com.br/json/last/${pairs.join(",")}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+
+  // One unknown pair makes AwesomeAPI reject the whole request, so retry with the featured pairs
+  let requested = PAIRS;
+  let res = await fetchPairs(requested);
+  if (!res.ok) {
+    requested = FEATURED_PAIRS;
+    res = await fetchPairs(requested);
+  }
 
   if (!res.ok) throw new Error(`AwesomeAPI responded ${res.status}`);
 
   const data: ApiResponse = await res.json();
 
   const quotes: Quote[] = [];
-  for (const pair of PAIRS) {
+  for (const pair of requested) {
     const d = data[pair.replace("-", "")]; // the API keys are "USDBRL", without the hyphen
     if (!d) continue; // the API can omit a pair; skip it instead of crashing the page
 
