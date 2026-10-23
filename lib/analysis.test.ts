@@ -22,7 +22,12 @@ describe("parseHistory", () => {
     expect(parseHistory(json)).toEqual([{ date: "2026-10-21", close: 5.1 }]);
   });
   it("drops empty and zero prices so stats never see Infinity or NaN", () => {
-    const json = [{ bid: "", timestamp: "1792784356" }, { bid: "0", timestamp: "1792708204" }, { bid: "5.1", timestamp: "1792621806" }];
+    const json = [
+      { bid: "", timestamp: "1792784356" },
+      { bid: "0", timestamp: "1792708204" },
+      { bid: "Infinity", timestamp: "1792784356" },
+      { bid: "5.1", timestamp: "1792621806" },
+    ];
     expect(parseHistory(json)).toEqual([{ date: "2026-10-21", close: 5.1 }]);
   });
   it("returns [] for anything that isn't an array", () => {

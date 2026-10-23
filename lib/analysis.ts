@@ -25,10 +25,10 @@ export function parseHistory(json: unknown): PricePoint[] {
 
     const ts = Number(result.data.timestamp);
     const close = Number(result.data.bid);
-    // A rate is never 0 or negative (this also rejects NaN), and an out-of-range timestamp
+    // A rate is never 0, negative, NaN or Infinity, and an out-of-range timestamp
     // makes an invalid Date, which would make toISOString throw
     const d = new Date(ts * 1000);
-    if (!(close > 0) || Number.isNaN(d.getTime())) continue;
+    if (!(Number.isFinite(close) && close > 0) || Number.isNaN(d.getTime())) continue;
 
     points.push({ date: d.toISOString().slice(0, 10), close, ts });
   }
