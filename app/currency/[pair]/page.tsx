@@ -59,6 +59,13 @@ async function CurrencyDetails({
   const points = sliceRange(history, range);
   const summary = summarize(points)!; // points is never empty when history is not
   const latest = history.at(-1)!;
+  // Live intraday price: noon UTC keeps its date from reading as tomorrow in Brasília
+  const latestDay = new Date(Date.parse(latest.date + "T12:00:00Z")).toLocaleDateString("en-US", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
   const isUp = summary.change >= 0;
   // Show "+" only for a real gain, so a flat period reads as zero
   const sign = summary.change > 0 ? "+" : "";
@@ -71,7 +78,7 @@ async function CurrencyDetails({
       </div>
 
       <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
-      <p className="mt-2 text-sm text-zinc-500">Latest close on {latest.date}</p>
+      <p className="mt-2 text-sm text-zinc-500">Latest price on {latestDay}</p>
 
       <RangeTabs pair={currency.pair} active={range} />
       <PriceChart points={points} />
