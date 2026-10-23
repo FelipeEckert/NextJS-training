@@ -14,21 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Painel de Cotações",
-  description: "Dólar, euro, libra e bitcoin em reais, atualizados a cada minuto.",
+  title: "Exchange Rates",
+  description: "US dollar, euro, pound and bitcoin in Brazilian reais, updated every minute.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="pt-BR"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <header className="border-b border-zinc-200 dark:border-zinc-800">
           <nav className="mx-auto flex w-full max-w-5xl items-center p-4">
             <Link href="/" className="font-bold">
-              💱 Cotações
+              💱 Exchange Rates
             </Link>
           </nav>
         </header>
