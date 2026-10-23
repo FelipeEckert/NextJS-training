@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { Suspense } from "react";
+import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,10 +28,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <nav className="mx-auto flex w-full max-w-5xl items-center p-4">
-            <Link href="/" className="font-bold">
-              💱 Exchange Rates
-            </Link>
+          <nav className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 p-4">
+            <div className="flex items-center gap-6">
+              <Link href="/" className="font-bold">
+                💱 Exchange Rates
+              </Link>
+              <Link href="/favorites" className="text-sm font-medium hover:underline">
+                Favorites
+              </Link>
+            </div>
+            {/* The session is per visitor, so it streams in and the rest of the layout stays static */}
+            <Suspense fallback={null}>
+              <UserMenu />
+            </Suspense>
           </nav>
         </header>
         {children}

@@ -4,12 +4,17 @@ import { updateTag } from "next/cache";
 import { z } from "zod";
 import { PairSchema, setFavorite } from "@/lib/favorites";
 import { getQuotes } from "@/lib/quotes";
+import { getCurrentUser } from "@/lib/session";
 
 const COOLDOWN_MS = 30_000; // AwesomeAPI updates about every 30s, so refreshing faster gains nothing
 
 export type RefreshState = { message: string } | null;
 
 export async function refreshQuotes(): Promise<RefreshState> {
+  // Only signed-in users can force a refresh. Checked HERE, inside the action,
+  // because hiding the button wouldn't stop anyone from calling the endpoint directly
+  if (!(await getCurrentUser())) return { message: "Sign in to refresh the rates." };
+
   // Server Actions are public endpoints: anyone can call this in a loop.
   // The cooldown is global, so no caller can bust the cache more than once per 30s.
   // shortcut: the cache lives in this server's memory, so with many server instances each has its own cooldown; use a shared store (e.g. Redis) when scaling out
