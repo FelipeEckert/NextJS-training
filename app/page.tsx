@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { QuoteCard } from "@/components/QuoteCard";
 import { RefreshButton } from "@/components/RefreshButton";
 import { getQuotes } from "@/lib/quotes";
@@ -14,6 +15,9 @@ export default async function Home() {
     <main className="mx-auto w-full max-w-5xl p-8">
       <h1 className="text-3xl font-bold">Exchange Rates</h1>
       <p className="mt-2 text-zinc-500">Live rates in Brazilian reais, updated every minute.</p>
+      <Link href="/currencies" className="mt-2 inline-block text-sm font-medium hover:underline">
+        Browse all 52 currencies →
+      </Link>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-zinc-500">Last fetched at {fetchedTime} (Brasília time)</p>
