@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { FavoriteStar } from "@/components/FavoriteStar";
+import { PriceChart } from "@/components/PriceChart";
+import { RangeTabs } from "@/components/RangeTabs";
+import { parseRange, sliceRange, summarize } from "@/lib/analysis";
 import { formatBRL } from "@/lib/format";
-import { FEATURED_PAIRS } from "@/lib/currencies";
-import { getQuote } from "@/lib/quotes";
+import { FEATURED_PAIRS, findCurrency } from "@/lib/currencies";
+import { getHistory } from "@/lib/history";
 
 // Tells Next which pairs exist, so it prerenders these pages at build time
 export function generateStaticParams() {
@@ -13,7 +16,7 @@ export function generateStaticParams() {
 
 // Not async: the page never awaits params itself, so its shell is the same for every pair
 // and <Link> can prefetch it once and reuse it (instant navigation)
-export default function CurrencyPage({ params }: PageProps<"/currency/[pair]">) {
+export default function CurrencyPage({ params, searchParams }: PageProps<"/currency/[pair]">) {
   return (
     <main className="mx-auto w-full max-w-3xl p-8">
       <Link href="/" className="text-sm text-zinc-500 hover:underline">
@@ -21,36 +24,79 @@ export default function CurrencyPage({ params }: PageProps<"/currency/[pair]">) 
       </Link>
 
       <Suspense fallback={<QuoteDetailsSkeleton />}>
-        <QuoteDetails params={params} />
+        <CurrencyDetails params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );
 }
 
-// Reads the URL (params), so it renders per pair, behind the Suspense boundary
-async function QuoteDetails({ params }: Pick<PageProps<"/currency/[pair]">, "params">) {
-  const { pair } = await params; // "USD-BRL", from the URL
-  const quote = await getQuote(pair);
+// Reads the URL (params and ?range=), so it renders per pair, behind the Suspense boundary
+async function CurrencyDetails({
+  params,
+  searchParams,
+}: Pick<PageProps<"/currency/[pair]">, "params" | "searchParams">) {
+  const { pair } = await params; // "usd-brl" or "USD-BRL", from the URL
+  const sp = await searchParams;
+  // A repeated ?range=a&range=b arrives as an array, so only a single string counts
+  const range = parseRange(typeof sp.range === "string" ? sp.range : undefined);
 
-  // shortcut: inside Suspense this renders the not-found page but keeps status 200 (with noindex) for unknown pairs; the proxy in Hour 6 will return a real 404 before rendering
-  if (!quote) notFound();
+  // The proxy already rejects unknown pairs; this check narrows the type
+  const currency = findCurrency(pair);
+  if (!currency) notFound();
 
-  const isUp = quote.change >= 0;
+  // Always pass currency.pair, never the raw URL value: getHistory only accepts exact catalog pairs
+  const history = await getHistory(currency.pair);
+
+  if (history.length === 0) {
+    return (
+      <>
+        <h1 className="mt-6 text-3xl font-bold">{currency.label}</h1>
+        <p className="mt-4 text-zinc-500">No price history available for this currency.</p>
+      </>
+    );
+  }
+
+  const points = sliceRange(history, range);
+  const summary = summarize(points)!; // points is never empty when history is not
+  const latest = history.at(-1)!;
+  const isUp = summary.change >= 0;
+  // Show "+" only for a real gain, so a flat period reads as zero
+  const sign = summary.change > 0 ? "+" : "";
 
   return (
     <>
       <div className="mt-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{quote.currency}</h1>
-        <FavoriteStar pair={quote.pair} />
+        <h1 className="text-3xl font-bold">{currency.label}</h1>
+        <FavoriteStar pair={currency.pair} />
       </div>
 
-      <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(quote.price)}</p>
-      <p className={`mt-2 text-lg ${isUp ? "text-green-600" : "text-red-600"}`}>
-        {isUp ? "▲" : "▼"} {quote.change.toFixed(2)}% today
-      </p>
+      <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
+      <p className="mt-2 text-sm text-zinc-500">Latest close on {latest.date}</p>
 
-      <p className="mt-6 text-sm text-zinc-500">Updated at {quote.updatedAt}</p>
+      <RangeTabs pair={currency.pair} active={range} />
+      <PriceChart points={points} />
+
+      <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <Stat label="Change">
+          <span className={isUp ? "text-green-600" : "text-red-600"}>
+            {`${sign}${formatBRL(summary.change)} (${sign}${summary.changePct.toFixed(2)}%)`}
+          </span>
+        </Stat>
+        <Stat label="Low">{formatBRL(summary.min)}</Stat>
+        <Stat label="High">{formatBRL(summary.max)}</Stat>
+        <Stat label="Average">{formatBRL(summary.average)}</Stat>
+        <Stat label="Volatility">{`${summary.volatility.toFixed(2)}% / day`}</Stat>
+      </dl>
     </>
+  );
+}
+
+function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <dt className="text-sm text-zinc-500">{label}</dt>
+      <dd className="mt-1 text-lg font-semibold tabular-nums">{children}</dd>
+    </div>
   );
 }
 
