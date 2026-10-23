@@ -12,18 +12,14 @@ export type Quote = {
 // Only the response fields we use. Numbers arrive as strings
 type ApiResponse = Record<string, { bid: string; pctChange: string; create_date: string }>;
 
-export async function getQuotes(
-  pairs: string[] = FEATURED_PAIRS,
-): Promise<{ quotes: Quote[]; fetchedAt: number }> {
+// One upstream call per minute no matter which pairs callers ask for, so callers can't bypass the cache
+async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }> {
   "use cache";
   cacheLife("minutes"); // at most one API call per minute, no matter how many visitors
   cacheTag("quotes"); // a label, so we can throw away this cache on demand
 
-  // Defense in depth: callers validate too, but we never forward an unknown pair to the API
-  if (pairs.some((pair) => !PAIRS.includes(pair))) throw new Error("Unsupported pair");
-
   // Fail fast if AwesomeAPI hangs, instead of hanging our page with it
-  const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pairs.join(",")}`, {
+  const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${PAIRS.join(",")}`, {
     signal: AbortSignal.timeout(5000),
   });
 
@@ -32,7 +28,7 @@ export async function getQuotes(
   const data: ApiResponse = await res.json();
 
   const quotes: Quote[] = [];
-  for (const pair of pairs) {
+  for (const pair of PAIRS) {
     const d = data[pair.replace("-", "")]; // the API keys are "USDBRL", without the hyphen
     if (!d) continue; // the API can omit a pair; skip it instead of crashing the page
 
@@ -49,10 +45,22 @@ export async function getQuotes(
   return { quotes, fetchedAt: Date.now() };
 }
 
+export async function getQuotes(
+  pairs: string[] = FEATURED_PAIRS,
+): Promise<{ quotes: Quote[]; fetchedAt: number }> {
+  // Defense in depth: callers validate too, but we never look up an unknown pair
+  if (pairs.some((pair) => !PAIRS.includes(pair))) throw new Error("Unsupported pair");
+
+  const all = await fetchAllQuotes(); // shared cache: reading a subset costs no extra API call
+  // Set removes duplicates and keeps first-seen order
+  const quotes = [...new Set(pairs)].flatMap((pair) => all.quotes.filter((q) => q.pair === pair));
+  return { quotes, fetchedAt: all.fetchedAt };
+}
+
 export async function getQuote(pair: string) {
   const upper = pair.toUpperCase();
   if (!PAIRS.includes(upper)) return undefined;
 
-  const { quotes } = await getQuotes([upper]); // its own cache entry, one API call per pair
+  const { quotes } = await getQuotes([upper]);
   return quotes[0];
 }
