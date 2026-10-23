@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { fetchAwesomeApi } from "./awesomeapi";
 import { PAIRS } from "./currencies";
 import { type PricePoint, parseHistory } from "./analysis";
 
@@ -11,9 +12,7 @@ export async function getHistory(pair: string): Promise<PricePoint[]> {
 
   if (!PAIRS.includes(pair)) throw new Error("Unsupported pair"); // never forward unknown pairs
 
-  const res = await fetch(`https://economia.awesomeapi.com.br/json/daily/${pair}/360`, {
-    signal: AbortSignal.timeout(5000),
-  });
+  const res = await fetchAwesomeApi(`/json/daily/${pair}/360`);
 
   if (!res.ok) throw new Error(`AwesomeAPI responded ${res.status}`);
 

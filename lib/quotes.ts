@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { fetchAwesomeApi } from "./awesomeapi";
 import { FEATURED_PAIRS, PAIRS, findCurrency } from "./currencies";
 
 export type Quote = {
@@ -19,11 +20,7 @@ async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }>
   cacheLife("minutes"); // at most one API call per minute, no matter how many visitors
   cacheTag("quotes"); // a label, so we can throw away this cache on demand
 
-  // Fail fast if AwesomeAPI hangs, instead of hanging our page with it
-  const fetchPairs = (pairs: string[]) =>
-    fetch(`https://economia.awesomeapi.com.br/json/last/${pairs.join(",")}`, {
-      signal: AbortSignal.timeout(5000),
-    });
+  const fetchPairs = (pairs: string[]) => fetchAwesomeApi(`/json/last/${pairs.join(",")}`);
 
   // One unknown pair makes AwesomeAPI reject the whole request, so retry with the featured pairs
   let requested = PAIRS;
