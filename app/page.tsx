@@ -1,9 +1,13 @@
+import { io } from "next/cache";
 import Link from "next/link";
 import { QuoteCard } from "@/components/QuoteCard";
 import { RefreshButton } from "@/components/RefreshButton";
 import { getQuotes } from "@/lib/quotes";
 
 export default async function Home() {
+  // Fetch at request time, not during the build: if the API refuses the build server, the deploy
+  // still succeeds and visitors see the loading.tsx skeleton until the (cached) data arrives
+  await io();
   const { quotes, fetchedAt } = await getQuotes();
 
   // Server time zone can differ (e.g. UTC on Vercel), so we pin Brazil's
