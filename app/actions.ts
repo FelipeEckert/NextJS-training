@@ -1,6 +1,7 @@
 "use server"; // runs only on the server, but the browser can call it like an API endpoint
 
 import { updateTag } from "next/cache";
+import { getFavorites, PairSchema, saveFavorites } from "@/lib/favorites";
 import { getQuotes } from "@/lib/quotes";
 
 const COOLDOWN_MS = 30_000; // AwesomeAPI updates about every 30s, so refreshing faster gains nothing
@@ -20,4 +21,18 @@ export async function refreshQuotes(): Promise<RefreshState> {
 
   updateTag("quotes"); // expire the cache now; the page re-renders with fresh data
   return { message: "Rates updated." };
+}
+
+// Typed as unknown on purpose: anyone can call this endpoint with any value
+export async function toggleFavorite(pair: unknown) {
+  const parsed = PairSchema.safeParse(pair);
+  if (!parsed.success) return; // not a supported pair: ignore it
+
+  const favorites = await getFavorites();
+  const next = favorites.includes(parsed.data)
+    ? favorites.filter((p) => p !== parsed.data) // already a favorite → remove
+    : [...favorites, parsed.data]; // not yet → add
+
+  // Changing a cookie in a Server Action makes Next.js re-render the page with the new value
+  await saveFavorites(next);
 }

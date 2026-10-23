@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FavoriteButton } from "./FavoriteButton";
+import { FavoriteStar } from "./FavoriteStar";
 import { formatBRL } from "@/lib/format";
 
 // "type" describes the shape of the props, and TypeScript enforces it
@@ -21,7 +21,7 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
         <Link href={`/currency/${pair}`} className="text-sm text-zinc-500 hover:underline">
           {currency}
         </Link>
-        <FavoriteButton />
+        <FavoriteStar pair={pair} />
       </div>
 
       <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(price)}</p>

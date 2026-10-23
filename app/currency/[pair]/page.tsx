@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FavoriteButton } from "@/components/FavoriteButton";
+import { FavoriteStar } from "@/components/FavoriteStar";
 import { formatBRL } from "@/lib/format";
 import { currencies, getQuote } from "@/lib/quotes";
 
@@ -25,7 +25,7 @@ export default async function CurrencyPage({ params }: PageProps<"/currency/[pai
 
       <div className="mt-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">{quote.currency}</h1>
-        <FavoriteButton />
+        <FavoriteStar pair={quote.pair} />
       </div>
 
       <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(quote.price)}</p>
