@@ -3,12 +3,12 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FavoriteStar } from "@/components/FavoriteStar";
 import { formatBRL } from "@/lib/format";
-import { currencies } from "@/lib/currencies";
+import { FEATURED_PAIRS } from "@/lib/currencies";
 import { getQuote } from "@/lib/quotes";
 
 // Tells Next which pairs exist, so it prerenders these pages at build time
 export function generateStaticParams() {
-  return currencies.map((c) => ({ pair: c.pair }));
+  return FEATURED_PAIRS.map((pair) => ({ pair }));
 }
 
 // Not async: the page never awaits params itself, so its shell is the same for every pair

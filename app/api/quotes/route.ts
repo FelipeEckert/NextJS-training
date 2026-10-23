@@ -1,4 +1,4 @@
-import { currencies } from "@/lib/currencies";
+import { PAIRS } from "@/lib/currencies";
 import { getQuotes } from "@/lib/quotes";
 
 // GET /api/quotes                        → all quotes
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     .filter(Boolean);
 
   // Validate input before doing any work: reject pairs outside the allowlist
-  const allowed = currencies.map((c) => c.pair);
+  const allowed = PAIRS;
   const invalid = requested?.filter((p) => !allowed.includes(p)) ?? [];
   if (invalid.length > 0) {
     return Response.json(
