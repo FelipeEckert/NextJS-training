@@ -22,9 +22,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { quotes, fetchedAt } = await getQuotes(); // same cache as the pages
-    const data = requested?.length ? quotes.filter((q) => requested.includes(q.pair)) : quotes;
-    return Response.json({ data, fetchedAt: new Date(fetchedAt).toISOString() });
+    // Only the requested pairs are fetched; no pairs means the featured set
+    const { quotes, fetchedAt } = await getQuotes(requested?.length ? requested : undefined);
+    return Response.json({ data: quotes, fetchedAt: new Date(fetchedAt).toISOString() });
   } catch (error) {
     console.error(error); // full details stay in the server logs, never in the response
     // 502 Bad Gateway = "a service I depend on failed", not "I failed" (that would be 500)

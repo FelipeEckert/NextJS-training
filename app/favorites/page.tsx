@@ -26,8 +26,9 @@ async function FavoritesList() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/favorites");
 
-  const [favorites, { quotes }] = await Promise.all([getFavorites(), getQuotes()]);
-  const favoriteQuotes = quotes.filter((q) => favorites.includes(q.pair));
+  const favorites = await getFavorites();
+  // No favorites means no API call; otherwise fetch exactly the favorites, even ones outside the featured four
+  const favoriteQuotes = favorites.length > 0 ? (await getQuotes(favorites)).quotes : [];
 
   if (favoriteQuotes.length === 0) {
     return (
