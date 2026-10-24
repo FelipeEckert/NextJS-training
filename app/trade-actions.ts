@@ -8,7 +8,7 @@ import { findCurrency } from "@/lib/currencies";
 import { formatDecimal, parseBrlToCents, parseDecimal, QTY_SCALE } from "@/lib/money";
 import { getTradeQuote } from "@/lib/quotes";
 import { getCurrentUser } from "@/lib/session";
-import { executeTrade, type Order, type Trade } from "@/lib/trading";
+import { executeTrade, resetWallet, type Order, type Trade } from "@/lib/trading";
 
 const TradeInput = z.object({
   pair: PairSchema,
@@ -53,6 +53,14 @@ export async function trade(_prev: TradeState, formData: FormData): Promise<Trad
 
   refresh(); // re-render the balance and holdings shown on the page
   return { ok: true, message: describeTrade(pair, result.trade) };
+}
+
+export async function resetWalletAction(): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  await resetWallet(user.id);
+  refresh(); // re-render the wallet with the fresh cash and no positions
 }
 
 function describeTrade(pair: string, trade: Trade) {
