@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { TradeForm } from "@/components/TradeForm";
 import { formatDecimal, QTY_SCALE } from "@/lib/money";
@@ -16,6 +17,7 @@ export async function TradePanel({ pair, code }: { pair: string; code: string })
     );
   }
 
+  await connection(); // the DB driver draws random bytes; defer them to request time
   const wallet = await getWallet(user.id);
   const position = wallet.positions.find((p) => p.pair === pair);
   // key: a different pair must not inherit this form's last result or idempotency key

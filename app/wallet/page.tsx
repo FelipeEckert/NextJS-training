@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { ResetWalletButton } from "@/components/ResetWalletButton";
 import { findCurrency } from "@/lib/currencies";
@@ -30,6 +31,7 @@ async function WalletDetails() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/wallet");
 
+  await connection(); // the DB driver draws random bytes; defer them to request time
   const [wallet, trades] = await Promise.all([getWallet(user.id), listTrades(user.id)]);
 
   // Prices only for held pairs. If the quote API is down, rows show "Price unavailable" instead of failing the page

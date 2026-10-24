@@ -20,7 +20,13 @@ export function ResetWalletButton() {
 
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
-      <form action={resetWalletAction} className="flex items-center gap-3">
+      <form
+        action={async () => {
+          await resetWalletAction();
+          setConfirming(false); // back to the first step once the reset has finished
+        }}
+        className="flex items-center gap-3"
+      >
         <span className="font-medium">Reset to R$ 100,000?</span>
         <button
           type="submit"
