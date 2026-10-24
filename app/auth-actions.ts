@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { checkCredentials, createSession, deleteSession } from "@/lib/session";
+import { createSession, deleteSession } from "@/lib/session";
+import { verifyLogin } from "@/lib/users";
 
 const LoginInput = z.object({
   username: z.string().trim().min(1).max(50),
@@ -16,13 +17,13 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   const parsed = LoginInput.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Enter your username and password." };
 
-  // shortcut: no brute-force protection yet; add rate limiting per IP and username before going public
-  if (!checkCredentials(parsed.data.username, parsed.data.password)) {
+  const user = await verifyLogin(parsed.data.username, parsed.data.password);
+  if (!user) {
     // Never say which field was wrong: that would confirm valid usernames to an attacker
     return { error: "Invalid username or password." };
   }
 
-  await createSession(parsed.data.username);
+  await createSession(user);
   redirect(safeNextPath(parsed.data.next)); // redirect() throws, so nothing runs after it
 }
 
