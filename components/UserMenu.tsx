@@ -8,9 +8,14 @@ export async function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/login" className="text-sm font-medium hover:underline">
-        Sign in
-      </Link>
+      <div className="flex items-center gap-4 text-sm">
+        <Link href="/login" className="font-medium hover:underline">
+          Sign in
+        </Link>
+        <Link href="/signup" className="font-medium hover:underline">
+          Sign up
+        </Link>
+      </div>
     );
   }
 
