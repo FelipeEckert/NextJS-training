@@ -1,13 +1,22 @@
 import { randomUUID } from "node:crypto";
 
-import { afterAll, expect, it } from "vitest";
+import { afterAll, beforeAll, expect, it, vi } from "vitest";
 
 import { closeDb } from "./db";
 import { hitRateLimit } from "./rate-limit";
 
-afterAll(closeDb);
-
 const WINDOW_MS = 60_000;
+
+// Pin the clock mid-window so a minute boundary cannot split the hits; fake only Date so pg's timers keep working
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-24T12:00:30Z"));
+});
+
+afterAll(async () => {
+  vi.useRealTimers();
+  await closeDb();
+});
 
 it("allows hits up to the limit, then denies", async () => {
   const bucket = `test:${randomUUID()}`;
