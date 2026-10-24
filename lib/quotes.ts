@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { fetchAwesomeApi } from "./awesomeapi";
 import { FEATURED_PAIRS, PAIRS, findCurrency } from "./currencies";
+import { toTradeQuote, type TradeQuote } from "./trade-quote";
 
 export type Quote = {
   pair: string;
@@ -8,10 +9,15 @@ export type Quote = {
   price: number;
   change: number;
   updatedAt: string;
+  bid: string; // raw API strings, so trades keep exact decimals
+  ask: string;
 };
 
 // Only the response fields we use. Numbers arrive as strings
-type ApiResponse = Record<string, { bid: string; pctChange: string; create_date: string }>;
+type ApiResponse = Record<
+  string,
+  { bid: string; ask: string; pctChange: string; create_date: string }
+>;
 
 // One upstream call per minute no matter which pairs callers ask for, so callers can't bypass the cache
 async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }> {
@@ -45,6 +51,8 @@ async function fetchAllQuotes(): Promise<{ quotes: Quote[]; fetchedAt: number }>
       price: Number(d.bid),
       change: Number(d.pctChange),
       updatedAt: d.create_date,
+      bid: d.bid,
+      ask: d.ask,
     });
   }
 
@@ -70,4 +78,14 @@ export async function getQuote(pair: string) {
 
   const { quotes } = await getQuotes([upper]);
   return quotes[0];
+}
+
+// Not cached: freshness depends on Date.now(), so the cache stays in fetchAllQuotes
+export async function getTradeQuote(pair: string): Promise<TradeQuote | null> {
+  try {
+    const { quotes, fetchedAt } = await getQuotes([pair]);
+    return toTradeQuote(quotes[0], fetchedAt, Date.now());
+  } catch {
+    return null; // API down or unsupported pair: the caller must not trade
+  }
 }
