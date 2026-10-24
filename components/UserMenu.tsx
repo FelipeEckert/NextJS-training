@@ -16,7 +16,7 @@ export async function UserMenu() {
 
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="text-zinc-500">Signed in as {user}</span>
+      <span className="text-zinc-500">Signed in as {user.username}</span>
       <form action={logout}>
         <button type="submit" className="font-medium hover:underline">
           Sign out
