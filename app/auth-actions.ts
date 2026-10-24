@@ -64,7 +64,7 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
 // The shared demo account has no password, so this button is its only way in
 export async function tryDemo(): Promise<void> {
   await createSession(await ensureDemoUser());
-  redirect("/");
+  redirect("/wallet");
 }
 
 export async function logout() {
@@ -76,8 +76,12 @@ export async function logout() {
 // /login?next=https://evil.com would send users to an attacker right after a real login
 // (an "open redirect"). Parsing with URL also catches tricks like "//evil.com" and "/\evil.com".
 function safeNextPath(next: string | undefined) {
-  if (!next) return "/favorites";
+  if (!next) return "/wallet";
   const base = "http://internal";
-  const url = new URL(next, base);
-  return url.origin === base ? `${url.pathname}${url.search}` : "/favorites";
+  try {
+    const url = new URL(next, base);
+    return url.origin === base ? `${url.pathname}${url.search}` : "/wallet";
+  } catch {
+    return "/wallet"; // malformed input such as "//[" makes URL throw
+  }
 }

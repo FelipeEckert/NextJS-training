@@ -17,7 +17,12 @@ export function proxy(request: NextRequest) {
 
   // 2. Optimistic auth check: no session cookie → go sign in first.
   //    It only checks that the cookie EXISTS. The page checks that it's valid.
-  if (pathname.startsWith("/favorites") && !request.cookies.has("session")) {
+  if (
+    (pathname.startsWith("/favorites") ||
+      pathname.startsWith("/wallet") ||
+      pathname.startsWith("/settings")) &&
+    !request.cookies.has("session")
+  ) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname); // come back here after signing in
     return NextResponse.redirect(loginUrl);
@@ -28,5 +33,5 @@ export function proxy(request: NextRequest) {
 
 // Only run on these paths, so every other request skips the proxy entirely
 export const config = {
-  matcher: ["/currency/:path*", "/favorites/:path*"],
+  matcher: ["/currency/:path*", "/favorites/:path*", "/wallet/:path*", "/settings/:path*"],
 };
