@@ -4,6 +4,7 @@ import { Suspense, type ReactNode } from "react";
 import { FavoriteStar } from "@/components/FavoriteStar";
 import { PriceChart } from "@/components/PriceChart";
 import { RangeTabs } from "@/components/RangeTabs";
+import { TradePanel } from "@/components/TradePanel";
 import { parseRange, sliceRange, summarize } from "@/lib/analysis";
 import { formatBRL } from "@/lib/format";
 import { FEATURED_PAIRS, findCurrency } from "@/lib/currencies";
@@ -79,6 +80,11 @@ async function CurrencyDetails({
 
       <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
       <p className="mt-2 text-sm text-zinc-500">Latest price on {latestDay}</p>
+
+      {/* Reads the session cookie, so it streams in on its own */}
+      <Suspense fallback={null}>
+        <TradePanel pair={currency.pair} code={currency.code} />
+      </Suspense>
 
       <RangeTabs pair={currency.pair} active={range} />
       <PriceChart points={points} />
