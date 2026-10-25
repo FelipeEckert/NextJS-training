@@ -69,5 +69,9 @@ function describeTrade(pair: string, trade: Trade) {
   const quantity = formatDecimal(trade.quantity, QTY_SCALE);
   const total = formatBRL(trade.totalCents / 100); // display only, never used for money math
   const price = formatBRL(Number(formatDecimal(trade.price, QTY_SCALE)));
-  return `${verb} ${quantity} ${code} for ${total} at ${price}.`;
+  const time = trade.createdAt.toLocaleTimeString("en-US", {
+    timeZone: "America/Sao_Paulo",
+    hour12: false,
+  });
+  return `${verb} ${quantity} ${code} for ${total} at ${price} (${time} Brasília time).`;
 }
