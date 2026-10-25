@@ -2,8 +2,9 @@
 // against seeded Postgres data and a fake AwesomeAPI, then requests the key pages.
 import { spawn, spawnSync } from "node:child_process";
 import { createHmac } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
+import { createServer as createNetServer } from "node:net";
 
 import pg from "pg";
 
@@ -97,7 +98,17 @@ async function seed(client) {
   return user.id;
 }
 
+// Fails if something already listens on the app port, so we never test someone else's server
+function assertPortFree(port) {
+  return new Promise((resolve, reject) => {
+    const probe = createNetServer();
+    probe.once("error", () => reject(new Error(`port ${port} is already in use`)));
+    probe.listen(port, () => probe.close(() => resolve()));
+  });
+}
+
 function startDevServer() {
+  rmSync(LOG_FILE, { force: true }); // entries from an earlier run must not fail this one
   const child = spawn(`npx next dev -p ${APP_PORT}`, {
     shell: true,
     detached: process.platform !== "win32", // own process group, so we can kill the whole tree
@@ -105,11 +116,18 @@ function startDevServer() {
     stdio: ["ignore", "pipe", "pipe"],
   });
   let output = "";
+  let exit = null; // why the dev server stopped early, if it did
   child.stdout.setEncoding("utf8");
   child.stderr.setEncoding("utf8");
   child.stdout.on("data", (chunk) => (output += chunk));
   child.stderr.on("data", (chunk) => (output += chunk));
-  return { child, getOutput: () => output };
+  child.on("exit", (code, signal) => {
+    exit ??= code !== null ? `exit code ${code}` : `signal ${signal}`;
+  });
+  child.on("error", (error) => {
+    exit ??= error.message;
+  });
+  return { child, getOutput: () => output, getExit: () => exit };
 }
 
 function stopDevServer(child) {
@@ -124,9 +142,14 @@ function stopDevServer(child) {
   }
 }
 
-async function waitForApp() {
+async function waitForApp(dev) {
   const deadline = Date.now() + TIMEOUT_MS;
   while (Date.now() < deadline) {
+    const exit = dev.getExit();
+    if (exit) {
+      const tail = dev.getOutput().split("\n").slice(-20).join("\n");
+      throw new Error(`next dev stopped before ${APP}/login answered (${exit}). Last output:\n${tail}`);
+    }
     try {
       const res = await fetch(`${APP}/login`, { signal: AbortSignal.timeout(TIMEOUT_MS) });
       await res.text();
@@ -214,8 +237,9 @@ async function main() {
   let errors = [];
   try {
     const userId = await seed(client);
+    await assertPortFree(APP_PORT);
     dev = startDevServer();
-    await waitForApp();
+    await waitForApp(dev);
     results = await runChecks(mintSessionCookie(userId));
     await sleep(3000); // let the dev server log anything it raised after the last response
     errors = collectServerErrors(dev.getOutput());
