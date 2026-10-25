@@ -96,8 +96,9 @@ Cache-Control: no-store`}</Code>
       <Section title="Conventions">
         <ul className="mt-3 list-disc space-y-2 pl-6">
           <li>
-            Amounts are strings. BRL amounts have up to 2 decimals; quantities have up to 10. Extra
-            decimals are dropped, never rounded up.
+            Amounts are strings. A <code>brl</code> amount with more than 2 decimals is rejected
+            with <code>400 INVALID_AMOUNT</code>. A <code>quantity</code> with more than 10
+            decimals is accepted, but the extra decimals are dropped, never rounded up.
           </li>
           <li>Pairs are case-insensitive: <code>usd-brl</code> and <code>USD-BRL</code> are the same.</li>
           <li>Buys fill at the ask and sells at the bid. Rounding always goes down.</li>
@@ -123,8 +124,11 @@ Cache-Control: no-store`}</Code>
             <code>422 IDEMPOTENCY_MISMATCH</code>.
           </li>
           <li>
-            If a retry hits <code>503 PRICE_UNAVAILABLE</code>, no trade was made. Retry later with
-            the <strong>same</strong> Idempotency-Key.
+            A <code>503 PRICE_UNAVAILABLE</code> is sent before the idempotency lookup, so that
+            request never trades. A retry needs a fresh quote too, so during a price outage even a
+            retry of an order that already went through gets <code>503</code>. Retry later with the{" "}
+            <strong>same</strong> Idempotency-Key: once prices are back, an order that already went
+            through returns the stored trade with <code>200</code>.
           </li>
           <li>
             Resetting your wallet deletes your trades, so the old Idempotency-Keys become usable
@@ -168,7 +172,7 @@ Cache-Control: no-store`}</Code>
 
         <Endpoint
           title="GET /api/v1/wallet"
-          description="Your cash, positions and total value. returnPct is the percent return since you started. Value fields are null while prices are unavailable."
+          description="Your cash, positions and total value. returnPct is the percent return since you started. Each position's value is null when that pair has no price right now. total and returnPct are null when any held pair has no price."
           request={`curl -H "Authorization: Bearer $API_KEY" ${BASE_URL}/api/v1/wallet`}
           response={`{
   "data": {
@@ -191,7 +195,7 @@ Cache-Control: no-store`}</Code>
 
         <Endpoint
           title="POST /api/v1/orders"
-          description={`Buy with brl, or sell with quantity. Send "all" as the quantity to sell the whole position. Returns 201 with the new trade, or 200 when the Idempotency-Key was already used for this order. A buy needs at least R$ 1.00.`}
+          description={`Buy with brl, or sell with quantity. Send "all" (lowercase only; "ALL" gets 400 INVALID_AMOUNT) as the quantity to sell the whole position. Unknown fields, or a field for the other side such as brl on a sell, get 400 INVALID_BODY. Returns 201 with the new trade, or 200 when the Idempotency-Key was already used for this order. A buy needs at least R$ 1.00.`}
           request={`curl -X POST ${BASE_URL}/api/v1/orders \\
   -H "Authorization: Bearer $API_KEY" \\
   -H "Idempotency-Key: 3f9c1e7a-5b2d-4e8f-9a61-0c4d7b2e8f15" \\

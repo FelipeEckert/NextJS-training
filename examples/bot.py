@@ -40,9 +40,9 @@ def call(method, path, body=None, headers=None):
         raw = error.read().decode(errors="replace")
         try:
             detail = json.loads(raw)["error"]
-            print(f"{error.code} {detail['code']}: {detail['message']}")
+            print(f"{error.code} {detail['code']}: {detail['message']}", file=sys.stderr)
         except (ValueError, KeyError, TypeError):
-            print(f"{error.code} {raw}")
+            print(f"{error.code} {raw}", file=sys.stderr)
         sys.exit(1)
 
 
