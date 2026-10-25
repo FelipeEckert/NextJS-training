@@ -96,7 +96,8 @@ function sma(history: PricePoint[], i: number, days: number): number {
   return sum / days;
 }
 
-const DEFAULTS: Record<string, string> = {
+// The form pre-fills from these, so the page and the parser share one set of defaults
+export const DEFAULTS: Record<string, string> = {
   pair: "USD-BRL",
   kind: "dip",
   dropPct: "2",

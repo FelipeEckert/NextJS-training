@@ -183,6 +183,13 @@ const CHECKS = [
     contains: [USERNAME],
     notContains: ["temporarily unavailable"],
   },
+  {
+    path: "/backtest?pair=USD-BRL&kind=dip",
+    cookie: false,
+    status: 200,
+    contains: ["Buy and hold", "Max drawdown"],
+    notContains: ["History unavailable"],
+  },
 ];
 
 async function runChecks(sessionToken) {
