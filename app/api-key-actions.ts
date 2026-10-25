@@ -6,7 +6,8 @@ import { createApiKey, revokeApiKey } from "@/lib/api-keys";
 import { getCurrentUser } from "@/lib/session";
 
 const CreateKeyInput = z.object({ name: z.string().trim().min(1).max(50) });
-const RevokeKeyInput = z.object({ id: z.coerce.number().int().positive() });
+// Postgres int4 id column: a bigger id from a tampered form would make the query throw
+const RevokeKeyInput = z.object({ id: z.coerce.number().int().positive().max(2_147_483_647) });
 
 export type CreateKeyState = { key?: string; error?: string } | null;
 
