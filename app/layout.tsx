@@ -39,6 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/wallet" className="text-sm font-medium hover:underline">
                 Wallet
               </Link>
+              <Link href="/leaderboard" className="text-sm font-medium hover:underline">
+                Leaderboard
+              </Link>
               <Link href="/currencies" className="text-sm font-medium hover:underline">
                 All currencies
               </Link>

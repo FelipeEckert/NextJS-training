@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 
 import { and, desc, eq } from "drizzle-orm";
 
+import { PAIRS } from "./currencies";
 import { getDb } from "./db";
 import { positions, trades, wallets } from "./db/schema";
 import {
@@ -65,6 +66,8 @@ export async function executeTrade(
   quote: Pick<TradeQuote, "bid" | "ask">,
   idempotencyKey: string,
 ): Promise<TradeResult> {
+  // Callers validate too, but the DB must never hold a pair the quote API cannot price
+  if (!PAIRS.includes(order.pair)) throw new Error("Unsupported pair");
   const hash = requestHash(order);
 
   return getDb().transaction(async (tx) => {

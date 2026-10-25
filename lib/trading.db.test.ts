@@ -25,7 +25,7 @@ afterAll(closeDb);
 
 it("lets only one of two simultaneous buys spend the same cash", async () => {
   const user = await createTestUser();
-  const buy = { pair: "USD", side: "buy" as const, brlCents: 6_000_000 };
+  const buy = { pair: "USD-BRL", side: "buy" as const, brlCents: 6_000_000 };
 
   const results = await Promise.all([
     executeTrade(user.id, buy, flat, randomUUID()),
@@ -40,7 +40,7 @@ it("lets only one of two simultaneous buys spend the same cash", async () => {
 
 it("replays a repeated key instead of trading twice", async () => {
   const user = await createTestUser();
-  const buy = { pair: "USD", side: "buy" as const, brlCents: 10_000 };
+  const buy = { pair: "USD-BRL", side: "buy" as const, brlCents: 10_000 };
   const key = randomUUID();
 
   const first = await executeTrade(user.id, buy, flat, key);
@@ -55,7 +55,7 @@ it("replays a repeated key instead of trading twice", async () => {
 
 it("trades once when the same key arrives concurrently", async () => {
   const user = await createTestUser();
-  const buy = { pair: "USD", side: "buy" as const, brlCents: 10_000 };
+  const buy = { pair: "USD-BRL", side: "buy" as const, brlCents: 10_000 };
   const key = randomUUID();
 
   const results = await Promise.all([
@@ -73,10 +73,10 @@ it("rejects a reused key sent with a different amount", async () => {
   const user = await createTestUser();
   const key = randomUUID();
 
-  await executeTrade(user.id, { pair: "USD", side: "buy", brlCents: 10_000 }, flat, key);
+  await executeTrade(user.id, { pair: "USD-BRL", side: "buy", brlCents: 10_000 }, flat, key);
   const result = await executeTrade(
     user.id,
-    { pair: "USD", side: "buy", brlCents: 20_000 },
+    { pair: "USD-BRL", side: "buy", brlCents: 20_000 },
     flat,
     key,
   );
@@ -89,13 +89,13 @@ it("removes the position when the whole holding is sold", async () => {
 
   const bought = await executeTrade(
     user.id,
-    { pair: "USD", side: "buy", brlCents: 10_000 },
+    { pair: "USD-BRL", side: "buy", brlCents: 10_000 },
     spread,
     randomUUID(),
   );
   const sold = await executeTrade(
     user.id,
-    { pair: "USD", side: "sell", quantity: "all" },
+    { pair: "USD-BRL", side: "sell", quantity: "all" },
     spread,
     randomUUID(),
   );
@@ -108,8 +108,8 @@ it("removes the position when the whole holding is sold", async () => {
 
 it("lists trades newest first, then resets the wallet", async () => {
   const user = await createTestUser();
-  await executeTrade(user.id, { pair: "USD", side: "buy", brlCents: 10_000 }, flat, randomUUID());
-  await executeTrade(user.id, { pair: "USD", side: "buy", brlCents: 20_000 }, flat, randomUUID());
+  await executeTrade(user.id, { pair: "USD-BRL", side: "buy", brlCents: 10_000 }, flat, randomUUID());
+  await executeTrade(user.id, { pair: "USD-BRL", side: "buy", brlCents: 20_000 }, flat, randomUUID());
 
   expect((await listTrades(user.id)).map((t) => t.totalCents)).toEqual([20_000, 10_000]);
 
@@ -120,5 +120,14 @@ it("lists trades newest first, then resets the wallet", async () => {
   expect(wallet.cashCents).toBe(STARTING_CASH_CENTS);
   expect(wallet.positions).toEqual([]);
   expect(wallet.startedAt.getTime()).toBeGreaterThanOrEqual(before);
+  expect(await listTrades(user.id)).toEqual([]);
+});
+
+it("refuses a pair outside the catalog before writing anything", async () => {
+  const user = await createTestUser();
+
+  await expect(
+    executeTrade(user.id, { pair: "XXX-BRL", side: "buy", brlCents: 10_000 }, flat, randomUUID()),
+  ).rejects.toThrow("Unsupported pair");
   expect(await listTrades(user.id)).toEqual([]);
 });
