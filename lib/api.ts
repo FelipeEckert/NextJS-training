@@ -15,11 +15,14 @@ export function apiError(
   return Response.json({ error: { code, message } }, { status, headers });
 }
 
-// Response headers can be immutable (e.g. from fetch), so copy the response before setting one
-function withRemaining(res: Response, remaining: number): Response {
-  const copy = new Response(res.body, res);
-  copy.headers.set("X-RateLimit-Remaining", String(remaining));
-  return copy;
+// Applied to every response withApiKey returns: keys and results are never cached,
+// and the remaining count is sent whenever the rate limiter has answered
+function finish(res: Response, remaining?: number): Response {
+  // Response headers can be immutable (e.g. from fetch), so copy the response before setting them
+  const out = new Response(res.body, res);
+  out.headers.set("Cache-Control", "no-store");
+  if (remaining !== undefined) out.headers.set("X-RateLimit-Remaining", String(remaining));
+  return out;
 }
 
 // Order matters: a request without a valid key never reaches the rate limiter
@@ -27,25 +30,33 @@ export function withApiKey<Ctx>(
   handler: (request: Request, ctx: Ctx, auth: ApiAuth) => Promise<Response>,
 ): (request: Request, ctx: Ctx) => Promise<Response> {
   return async (request, ctx) => {
-    const auth = await authenticateApiKey(request.headers.get("authorization"));
-    if (!auth) return apiError(401, "UNAUTHORIZED", "Missing or invalid API key.");
-
-    const limit = await hitRateLimit(`api:${auth.keyId}`, 60, 60_000);
-    if (!limit.allowed) {
-      return apiError(429, "RATE_LIMITED", "Too many requests. Try again later.", {
-        "Retry-After": String(limit.retryAfterSeconds),
-        "X-RateLimit-Remaining": String(limit.remaining),
-      });
-    }
-
-    let res: Response;
+    let remaining: number | undefined; // unknown until the rate limiter has answered
     try {
-      res = await handler(request, ctx, auth);
+      const auth = await authenticateApiKey(request.headers.get("authorization"));
+      if (!auth) {
+        return finish(
+          apiError(401, "UNAUTHORIZED", "Missing or invalid API key.", {
+            "WWW-Authenticate": "Bearer",
+          }),
+        );
+      }
+
+      const limit = await hitRateLimit(`api:${auth.keyId}`, 60, 60_000);
+      remaining = limit.remaining;
+      if (!limit.allowed) {
+        return finish(
+          apiError(429, "RATE_LIMITED", "Too many requests. Try again later.", {
+            "Retry-After": String(limit.retryAfterSeconds),
+          }),
+          limit.remaining,
+        );
+      }
+
+      return finish(await handler(request, ctx, auth), limit.remaining);
     } catch (error) {
-      // Logs only the error, never the request: the Authorization header holds the key
-      console.error(error);
-      res = apiError(500, "INTERNAL_ERROR", "Something went wrong.");
+      // The message only: Drizzle error objects also carry the query parameters
+      console.error(error instanceof Error ? error.message : error);
+      return finish(apiError(500, "INTERNAL_ERROR", "Something went wrong."), remaining);
     }
-    return withRemaining(res, limit.remaining);
   };
 }
