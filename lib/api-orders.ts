@@ -17,6 +17,12 @@ export const OrderBodySchema = z.discriminatedUnion("side", [
 // Query string value: a number is required, so the caller handles the absent case
 export const LimitSchema = z.coerce.number().int().min(1).max(100);
 
+// Cost per whole unit with QTY_SCALE decimals, rounded down; quantity is itself scaled by 10^QTY_SCALE
+export function averageCost(costCents: number, quantity: bigint): string {
+  if (quantity === 0n) return "0";
+  return formatDecimal((BigInt(costCents) * 10n ** BigInt(2 * QTY_SCALE)) / (100n * quantity), QTY_SCALE);
+}
+
 export function tradeToJson(trade: Trade) {
   return {
     id: trade.id,

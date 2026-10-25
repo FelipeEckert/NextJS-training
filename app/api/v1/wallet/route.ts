@@ -1,4 +1,5 @@
 import { withApiKey } from "@/lib/api";
+import { averageCost } from "@/lib/api-orders";
 import { getQuotes } from "@/lib/quotes";
 import { centsToBrl, formatDecimal, parseDecimal, QTY_SCALE } from "@/lib/money";
 import { valuePortfolio } from "@/lib/portfolio";
@@ -43,10 +44,3 @@ export const GET = withApiKey(async (_request, _ctx, auth) => {
     },
   });
 });
-
-// Cost per whole unit, in cents: the scaled quantity is the divisor, so the result rounds down
-function averageCost(costCents: number, quantity: bigint): string {
-  if (quantity === 0n) return "0.00";
-  const cents = (BigInt(costCents) * 10n ** BigInt(QTY_SCALE)) / quantity;
-  return centsToBrl(Number(cents));
-}
