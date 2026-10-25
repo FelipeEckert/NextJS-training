@@ -2,11 +2,16 @@
 
 const round1 = (n: number) => Number(n.toFixed(1));
 
-export function buildLinePath(values: number[], width: number, height: number): string {
+// A shared domain lets two lines be compared on the same scale
+export function buildLinePath(
+  values: number[],
+  width: number,
+  height: number,
+  domain?: [min: number, max: number],
+): string {
   if (values.length === 0) return "";
 
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const [min, max] = domain ?? [Math.min(...values), Math.max(...values)];
   const last = values.length - 1;
 
   return values

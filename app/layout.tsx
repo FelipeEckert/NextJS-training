@@ -42,6 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/leaderboard" className="text-sm font-medium hover:underline">
                 Leaderboard
               </Link>
+              <Link href="/backtest" className="text-sm font-medium hover:underline">
+                Backtest
+              </Link>
               <Link href="/currencies" className="text-sm font-medium hover:underline">
                 All currencies
               </Link>
