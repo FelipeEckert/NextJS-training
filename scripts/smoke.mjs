@@ -183,6 +183,7 @@ const CHECKS = [
     contains: [USERNAME],
     notContains: ["temporarily unavailable"],
   },
+  { path: "/docs/api", cookie: false, status: 200, contains: ["Idempotency-Key"] },
   {
     path: "/backtest?pair=USD-BRL&kind=dip",
     cookie: false,

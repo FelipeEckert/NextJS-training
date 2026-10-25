@@ -45,6 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/backtest" className="text-sm font-medium hover:underline">
                 Backtest
               </Link>
+              <Link href="/docs/api" className="text-sm font-medium hover:underline">
+                API
+              </Link>
               <Link href="/currencies" className="text-sm font-medium hover:underline">
                 All currencies
               </Link>
