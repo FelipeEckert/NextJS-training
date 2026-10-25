@@ -65,6 +65,14 @@ it("locks the account after 5 wrong passwords, even with the right one", async (
   expect(await verifyLogin(username, PASSWORD)).toBeNull();
 });
 
+it("keeps a parallel burst of wrong guesses from getting past the lockout", async () => {
+  const username = newUsername();
+  await createTestUser(username);
+
+  await Promise.all(Array.from({ length: 10 }, () => verifyLogin(username, "wrong password")));
+  expect(await verifyLogin(username, PASSWORD)).toBeNull();
+});
+
 it("resets the failure counter after a successful login", async () => {
   const username = newUsername();
   await createTestUser(username);
