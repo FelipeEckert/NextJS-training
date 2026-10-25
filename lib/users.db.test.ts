@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, expect, it } from "vitest";
 
 import { closeDb, getDb } from "./db";
-import { wallets } from "./db/schema";
+import { users, wallets } from "./db/schema";
 import { STARTING_CASH_CENTS } from "./money";
 import { createUser, ensureDemoUser, verifyLogin } from "./users";
 
@@ -70,6 +70,15 @@ it("keeps a parallel burst of wrong guesses from getting past the lockout", asyn
   await createTestUser(username);
 
   await Promise.all(Array.from({ length: 10 }, () => verifyLogin(username, "wrong password")));
+  expect(await verifyLogin(username, PASSWORD)).toBeNull();
+});
+
+it("rejects a guess past the budget while earlier guesses are still in flight", async () => {
+  const username = newUsername();
+  const user = await createTestUser(username);
+
+  // Mid-burst state: 5 guesses already claimed their slots, none has set the lock yet
+  await getDb().update(users).set({ failedLogins: 5 }).where(eq(users.id, user.id));
   expect(await verifyLogin(username, PASSWORD)).toBeNull();
 });
 
