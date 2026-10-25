@@ -22,6 +22,9 @@ export async function UserMenu() {
   return (
     <div className="flex items-center gap-3 text-sm">
       <span className="text-zinc-500">Signed in as {user.username}</span>
+      <Link href="/settings/api-keys" className="font-medium hover:underline">
+        API keys
+      </Link>
       <form action={logout}>
         <button type="submit" className="font-medium hover:underline">
           Sign out
