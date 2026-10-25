@@ -52,7 +52,10 @@ export function TradeForm({
             key={option}
             type="button"
             aria-pressed={side === option}
-            onClick={() => setSide(option)}
+            onClick={() => {
+              if (option !== side) keyRef.current = null;
+              setSide(option);
+            }}
             className={`rounded-lg px-4 py-2 font-medium ${
               side === option
                 ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
