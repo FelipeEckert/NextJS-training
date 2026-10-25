@@ -40,6 +40,32 @@ describe("OrderBodySchema", () => {
       OrderBodySchema.safeParse({ pair: "USD-BRL", side: "buy", brl: "1".repeat(41) }).success,
     ).toBe(false);
   });
+
+  it("rejects a pair longer than 20 characters", () => {
+    expect(
+      OrderBodySchema.safeParse({ pair: "A".repeat(21), side: "buy", brl: "1" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a quantity longer than 40 characters", () => {
+    expect(
+      OrderBodySchema.safeParse({ pair: "USD-BRL", side: "sell", quantity: "1".repeat(41) })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejects a body with an extra key", () => {
+    expect(
+      OrderBodySchema.safeParse({ pair: "USD-BRL", side: "buy", brl: "1", extra: true }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a body mixing buy and sell fields", () => {
+    expect(
+      OrderBodySchema.safeParse({ pair: "USD-BRL", side: "buy", brl: "10", quantity: "all" })
+        .success,
+    ).toBe(false);
+  });
 });
 
 describe("LimitSchema", () => {

@@ -4,12 +4,13 @@ import { centsToBrl, formatDecimal, QTY_SCALE } from "./money";
 import type { Trade } from "./trading";
 
 // Amounts stay strings so the exact decimals reach money.ts parsers unchanged
+// strict: a body mixing buy and sell fields, or with unknown keys, is rejected
 export const OrderBodySchema = z.discriminatedUnion("side", [
-  z.object({ pair: z.string().max(20), side: z.literal("buy"), brl: z.string().max(40) }),
-  z.object({
+  z.strictObject({ pair: z.string().max(20), side: z.literal("buy"), brl: z.string().max(40) }),
+  z.strictObject({
     pair: z.string().max(20),
     side: z.literal("sell"),
-    quantity: z.union([z.literal("all"), z.string().max(40)]),
+    quantity: z.string().max(40),
   }),
 ]);
 
