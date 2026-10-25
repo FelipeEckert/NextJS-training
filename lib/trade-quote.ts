@@ -18,5 +18,8 @@ export function toTradeQuote(
   const ask = parseDecimal(quote.ask, QTY_SCALE);
   if (bid === null || ask === null || bid <= 0n || ask <= 0n) return null;
 
+  // Buying at the ask and selling at a higher bid would mint money
+  if (ask < bid) return null;
+
   return { bid, ask, fetchedAt };
 }
