@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { PasswordSchema, UsernameSchema } from "@/lib/password";
+import { safeNextPath } from "@/lib/safe-next-path";
 import { hitRateLimit } from "@/lib/rate-limit";
 import { createSession, deleteSession } from "@/lib/session";
 import { createUser, ensureDemoUser, verifyLogin } from "@/lib/users";
@@ -70,18 +71,4 @@ export async function tryDemo(): Promise<void> {
 export async function logout() {
   await deleteSession();
   redirect("/");
-}
-
-// Only allow paths on our own site. Without this, a phishing link like
-// /login?next=https://evil.com would send users to an attacker right after a real login
-// (an "open redirect"). Parsing with URL also catches tricks like "//evil.com" and "/\evil.com".
-function safeNextPath(next: string | undefined) {
-  if (!next) return "/wallet";
-  const base = "http://internal";
-  try {
-    const url = new URL(next, base);
-    return url.origin === base ? `${url.pathname}${url.search}` : "/wallet";
-  } catch {
-    return "/wallet"; // malformed input such as "//[" makes URL throw
-  }
 }

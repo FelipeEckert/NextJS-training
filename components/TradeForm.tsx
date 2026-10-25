@@ -41,6 +41,10 @@ export function TradeForm({
   return (
     <form
       action={submit}
+      // Any edit makes it a different order, so it gets a new key; only an unchanged retry reuses one
+      onChange={() => {
+        keyRef.current = null;
+      }}
       className="mt-6 grid gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
     >
       <input type="hidden" name="pair" value={pair} />
@@ -52,7 +56,10 @@ export function TradeForm({
             key={option}
             type="button"
             aria-pressed={side === option}
-            onClick={() => setSide(option)}
+            onClick={() => {
+              if (option !== side) keyRef.current = null;
+              setSide(option);
+            }}
             className={`rounded-lg px-4 py-2 font-medium ${
               side === option
                 ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"

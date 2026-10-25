@@ -172,7 +172,7 @@ Cache-Control: no-store`}</Code>
 
         <Endpoint
           title="GET /api/v1/wallet"
-          description="Your cash, positions and total value. returnPct is the percent return since you started. Each position's value is null when that pair has no price right now. total and returnPct are null when any held pair has no price."
+          description="Your cash, positions and total value. returnPct is the percent return since you started. Each position's averageCost is the cost per unit with up to 10 decimals. Each position's value is null when that pair has no price right now. total and returnPct are null when any held pair has no price."
           request={`curl -H "Authorization: Bearer $API_KEY" ${BASE_URL}/api/v1/wallet`}
           response={`{
   "data": {
@@ -182,7 +182,7 @@ Cache-Control: no-store`}</Code>
       {
         "pair": "USD-BRL",
         "quantity": "201.3693113169",
-        "averageCost": "4.96",
+        "averageCost": "4.966",
         "value": "999.83"
       }
     ],

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
 
 import { getDb } from "./db";
 import { users, wallets } from "./db/schema";
@@ -63,26 +63,33 @@ export async function verifyLogin(username: string, password: string): Promise<S
   // The demo account has no password, so it can only be entered with the "Try the demo" button
   if (user.passwordHash === null) return null;
 
-  const locked = user.lockedUntil !== null && user.lockedUntil > new Date();
-  // Run even when locked, so a locked account costs the same as a wrong password
-  const ok = await verifyPassword(password, user.passwordHash);
-  if (locked) return null;
+  // Claim the attempt atomically before checking the password: parallel requests each take a
+  // numbered slot, so a burst can't fit more than MAX_FAILED_LOGINS guesses past the lockout
+  const [claim] = await db
+    .update(users)
+    .set({ failedLogins: sql`${users.failedLogins} + 1` })
+    .where(
+      and(eq(users.id, user.id), or(isNull(users.lockedUntil), lte(users.lockedUntil, sql`now()`))),
+    )
+    .returning({ failedLogins: users.failedLogins });
 
-  if (!ok) {
-    // Count in SQL so parallel wrong guesses can't lose an increment
-    const [row] = await db
+  // Run scrypt even when locked or over budget, so those cost the same as a wrong password
+  const ok = await verifyPassword(password, user.passwordHash);
+  if (!claim) return null; // locked
+
+  // The 5th wrong guess locks. An attempt past the budget locks too, so a counter left high by a
+  // request that died before locking can't keep the account shut forever
+  const overBudget = claim.failedLogins > MAX_FAILED_LOGINS;
+  if (overBudget || (!ok && claim.failedLogins >= MAX_FAILED_LOGINS)) {
+    await db
       .update(users)
-      .set({ failedLogins: sql`${users.failedLogins} + 1` })
-      .where(eq(users.id, user.id))
-      .returning({ failedLogins: users.failedLogins });
-    if (row.failedLogins >= MAX_FAILED_LOGINS) {
-      await db
-        .update(users)
-        .set({ lockedUntil: sql`now() + interval '15 minutes'`, failedLogins: 0 })
-        .where(eq(users.id, user.id));
-    }
+      .set({ lockedUntil: sql`now() + interval '15 minutes'`, failedLogins: 0 })
+      .where(
+        and(eq(users.id, user.id), or(isNull(users.lockedUntil), lte(users.lockedUntil, sql`now()`))),
+      );
     return null;
   }
+  if (!ok) return null;
 
   await db.update(users).set({ failedLogins: 0 }).where(eq(users.id, user.id));
   return { id: user.id, username: user.username };

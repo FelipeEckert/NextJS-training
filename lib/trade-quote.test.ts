@@ -43,4 +43,8 @@ describe("toTradeQuote", () => {
   it("rejects an ask that does not parse", () => {
     expect(toTradeQuote(quote({ ask: "abc" }), FETCHED_AT, FETCHED_AT)).toBeNull();
   });
+
+  it("rejects an inverted quote (ask below bid)", () => {
+    expect(toTradeQuote(quote({ bid: "5.2", ask: "5.1" }), FETCHED_AT, FETCHED_AT)).toBeNull();
+  });
 });

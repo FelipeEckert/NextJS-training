@@ -104,7 +104,7 @@ async function WalletDetails() {
           {returnPct === null ? (
             "Price unavailable"
           ) : (
-            <span className={gainClass(returnPct)}>{`${plus(returnPct)}${returnPct.toFixed(2)}%`}</span>
+            <span className={gainClass(Number(returnPct.toFixed(2)))}>{percent(returnPct)}</span>
           )}
         </Card>
         <Card label="Cash">{formatBRL(wallet.cashCents / 100)}</Card>
@@ -159,7 +159,7 @@ async function WalletDetails() {
                       ) : (
                         <span className={gainClass(row.plCents)}>
                           {`${plus(row.plCents)}${formatBRL(row.plCents / 100)}`}
-                          {row.plPct !== null && ` (${plus(row.plPct)}${row.plPct.toFixed(2)}%)`}
+                          {row.plPct !== null && ` (${percent(row.plPct)})`}
                         </span>
                       )}
                     </td>
@@ -230,6 +230,12 @@ function Card({ label, children }: { label: string; children: ReactNode }) {
 // Show "+" only for a real gain, so a flat result reads as zero
 function plus(value: number) {
   return value > 0 ? "+" : "";
+}
+
+// Round before picking the sign, so a tiny loss reads "0.00%" instead of "-0.00%"
+function percent(value: number) {
+  const shown = Number(value.toFixed(2));
+  return `${plus(shown)}${shown.toFixed(2)}%`;
 }
 
 function gainClass(value: number) {

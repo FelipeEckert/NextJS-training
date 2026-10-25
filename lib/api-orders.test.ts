@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LimitSchema, OrderBodySchema, tradeToJson } from "./api-orders";
+import { averageCost, LimitSchema, OrderBodySchema, tradeToJson } from "./api-orders";
 
 describe("OrderBodySchema", () => {
   it("accepts a buy with brl as a string", () => {
@@ -101,5 +101,19 @@ describe("tradeToJson", () => {
       total: "100.00",
       createdAt: "2026-10-25T12:00:00.000Z",
     });
+  });
+});
+
+describe("averageCost", () => {
+  it("returns the cost per unit", () => {
+    expect(averageCost(5000, 100_000_000_000n)).toBe("5");
+  });
+
+  it("keeps 10 decimals, rounded down", () => {
+    expect(averageCost(100, 30_000_000_000n)).toBe("0.3333333333");
+  });
+
+  it("is zero for an empty position", () => {
+    expect(averageCost(0, 0n)).toBe("0");
   });
 });
