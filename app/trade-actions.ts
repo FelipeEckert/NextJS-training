@@ -72,7 +72,7 @@ function describeTrade(pair: string, trade: Trade) {
   const price = `R$${formatDecimal(trade.price, QTY_SCALE)}`;
   const time = trade.createdAt.toLocaleTimeString("en-US", {
     timeZone: "America/Sao_Paulo",
-    hour12: false,
+    hourCycle: "h23", // hour12: false can print "24:05:00" just after midnight
   });
   return `${verb} ${quantity} ${code} for ${total} at ${price} (${time} Brasília time).`;
 }

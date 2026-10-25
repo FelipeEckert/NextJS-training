@@ -75,17 +75,21 @@ export async function verifyLogin(username: string, password: string): Promise<S
 
   // Run scrypt even when locked or over budget, so those cost the same as a wrong password
   const ok = await verifyPassword(password, user.passwordHash);
-  if (!claim || claim.failedLogins > MAX_FAILED_LOGINS) return null;
+  if (!claim) return null; // locked
 
-  if (!ok) {
-    if (claim.failedLogins >= MAX_FAILED_LOGINS) {
-      await db
-        .update(users)
-        .set({ lockedUntil: sql`now() + interval '15 minutes'`, failedLogins: 0 })
-        .where(eq(users.id, user.id));
-    }
+  // The 5th wrong guess locks. An attempt past the budget locks too, so a counter left high by a
+  // request that died before locking can't keep the account shut forever
+  const overBudget = claim.failedLogins > MAX_FAILED_LOGINS;
+  if (overBudget || (!ok && claim.failedLogins >= MAX_FAILED_LOGINS)) {
+    await db
+      .update(users)
+      .set({ lockedUntil: sql`now() + interval '15 minutes'`, failedLogins: 0 })
+      .where(
+        and(eq(users.id, user.id), or(isNull(users.lockedUntil), lte(users.lockedUntil, sql`now()`))),
+      );
     return null;
   }
+  if (!ok) return null;
 
   await db.update(users).set({ failedLogins: 0 }).where(eq(users.id, user.id));
   return { id: user.id, username: user.username };

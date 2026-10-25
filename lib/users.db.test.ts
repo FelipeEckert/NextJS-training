@@ -80,6 +80,11 @@ it("rejects a guess past the budget while earlier guesses are still in flight", 
   // Mid-burst state: 5 guesses already claimed their slots, none has set the lock yet
   await getDb().update(users).set({ failedLogins: 5 }).where(eq(users.id, user.id));
   expect(await verifyLogin(username, PASSWORD)).toBeNull();
+
+  // ...and that attempt sets the lock, so the high counter can't keep the account shut forever
+  const [row] = await getDb().select().from(users).where(eq(users.id, user.id));
+  expect(row.failedLogins).toBe(0);
+  expect(row.lockedUntil!.getTime()).toBeGreaterThan(Date.now());
 });
 
 it("resets the failure counter after a successful login", async () => {

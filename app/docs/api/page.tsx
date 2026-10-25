@@ -182,7 +182,7 @@ Cache-Control: no-store`}</Code>
       {
         "pair": "USD-BRL",
         "quantity": "201.3693113169",
-        "averageCost": "4.9603716294",
+        "averageCost": "4.966",
         "value": "999.83"
       }
     ],
