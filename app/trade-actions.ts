@@ -68,7 +68,8 @@ function describeTrade(pair: string, trade: Trade) {
   const verb = trade.side === "buy" ? "Bought" : "Sold";
   const quantity = formatDecimal(trade.quantity, QTY_SCALE);
   const total = formatBRL(trade.totalCents / 100); // display only, never used for money math
-  const price = formatBRL(Number(formatDecimal(trade.price, QTY_SCALE)));
+  // Every decimal of the fill price: the spec asks for the exact price used, and pairs like BTC or KRW need more than cents
+  const price = `R$${formatDecimal(trade.price, QTY_SCALE)}`;
   const time = trade.createdAt.toLocaleTimeString("en-US", {
     timeZone: "America/Sao_Paulo",
     hour12: false,
