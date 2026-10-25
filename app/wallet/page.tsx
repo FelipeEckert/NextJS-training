@@ -3,11 +3,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { PriceChart } from "@/components/PriceChart";
 import { ResetWalletButton } from "@/components/ResetWalletButton";
+import type { PricePoint } from "@/lib/analysis";
 import { findCurrency } from "@/lib/currencies";
 import { formatBRL } from "@/lib/format";
-import { formatDecimal, parseDecimal, QTY_SCALE } from "@/lib/money";
+import { getHistory } from "@/lib/history";
+import { formatDecimal, parseDecimal, QTY_SCALE, STARTING_CASH_CENTS } from "@/lib/money";
 import { valuePortfolio } from "@/lib/portfolio";
+import { portfolioHistory } from "@/lib/portfolio-history";
 import { getQuotes } from "@/lib/quotes";
 import { getCurrentUser } from "@/lib/session";
 import { getWallet, listTrades } from "@/lib/trading";
@@ -32,7 +36,12 @@ async function WalletDetails() {
   if (!user) redirect("/login?next=/wallet");
 
   await connection(); // the DB driver draws random bytes; defer them to request time
-  const [wallet, trades] = await Promise.all([getWallet(user.id), listTrades(user.id)]);
+  const [wallet, allTrades] = await Promise.all([
+    getWallet(user.id),
+    // shortcut: loads every trade; page through them if accounts reach thousands of trades
+    listTrades(user.id, 10_000),
+  ]);
+  const trades = allTrades.slice(0, 100); // the table shows the latest 100
 
   // Prices only for held pairs. If the quote API is down, rows show "Price unavailable" instead of failing the page
   const bids = new Map<string, bigint>();
@@ -60,6 +69,31 @@ async function WalletDetails() {
     day: "numeric",
   });
 
+  // Replays every trade over daily closes. If a price history fails, the chart stays hidden
+  const startDate = wallet.startedAt.toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  const chronological = [...allTrades].reverse().map((trade) => ({
+    date: trade.createdAt.toISOString().slice(0, 10),
+    pair: trade.pair,
+    side: trade.side,
+    quantity: trade.quantity,
+    totalCents: trade.totalCents,
+  }));
+  const pairs = [...new Set(allTrades.map((trade) => trade.pair))];
+  let chart: PricePoint[] | null = null;
+  try {
+    const histories = await Promise.all(pairs.map((pair) => getHistory(pair)));
+    chart = portfolioHistory({
+      startDate,
+      startingCashCents: STARTING_CASH_CENTS,
+      trades: chronological,
+      prices: Object.fromEntries(pairs.map((pair, i) => [pair, histories[i]])),
+      today,
+    });
+  } catch {
+    // keep chart null: the section is then left out
+  }
+
   return (
     <>
       <dl className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -75,6 +109,17 @@ async function WalletDetails() {
         </Card>
         <Card label="Cash">{formatBRL(wallet.cashCents / 100)}</Card>
       </dl>
+
+      {chart && (
+        <>
+          <h2 className="mt-10 text-xl font-semibold">Value over time</h2>
+          {chart.length >= 2 ? (
+            <PriceChart points={chart} />
+          ) : (
+            <p className="mt-4 text-zinc-500">Your chart appears after your first full day.</p>
+          )}
+        </>
+      )}
 
       <h2 className="mt-10 text-xl font-semibold">Positions</h2>
       {rows.length === 0 ? (
