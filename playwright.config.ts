@@ -30,6 +30,7 @@ export default defineConfig({
           url: "http://127.0.0.1:3100/login",
           timeout: 180_000,
           reuseExistingServer: false,
+          stdout: "pipe", // shows the dev server's output in the CI log if it crashes
           env: { AWESOMEAPI_BASE_URL: "http://127.0.0.1:3999" }, // merged over process.env
         },
       ],

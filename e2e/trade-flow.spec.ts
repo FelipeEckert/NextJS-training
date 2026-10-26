@@ -16,6 +16,18 @@ test("sign up, buy and sell USD, check the wallet, then reset it", async ({ page
   await expect(page.getByText("Total value")).toBeVisible();
 
   await page.goto("/currency/USD-BRL");
+  const orderSide = page.getByRole("group", { name: "Order side" });
+  const buyToggle = orderSide.getByRole("button", { name: "Buy", exact: true });
+  const sellToggle = orderSide.getByRole("button", { name: "Sell", exact: true });
+  // The order form is a client action, so a click before hydration is lost. The side toggle
+  // only changes local state, so retry it until it responds; then each order is clicked once
+  await expect(async () => {
+    await sellToggle.click();
+    await expect(sellToggle).toHaveAttribute("aria-pressed", "true", { timeout: 1_000 });
+  }).toPass({ timeout: 60_000 });
+  await buyToggle.click();
+  await expect(buyToggle).toHaveAttribute("aria-pressed", "true");
+
   await page.getByLabel("Amount (R$)").fill("100");
   // The Buy toggle comes first in the page, so the submit button is the last match
   await page.getByRole("button", { name: "Buy", exact: true }).last().click();
@@ -24,8 +36,7 @@ test("sign up, buy and sell USD, check the wallet, then reset it", async ({ page
     page.getByText(/^Bought .+ USD for R\$100\.00 at R\$[\d.]+ \(\d{2}:\d{2}:\d{2} Brasília time\)\.$/),
   ).toBeVisible();
 
-  const orderSide = page.getByRole("group", { name: "Order side" });
-  await orderSide.getByRole("button", { name: "Sell", exact: true }).click();
+  await sellToggle.click();
   await page.getByLabel("Sell all").check();
   await page.getByRole("button", { name: "Sell", exact: true }).last().click();
   await expect(page.getByText(/^Sold .+ USD for R\$[\d,.]+ at /)).toBeVisible();
