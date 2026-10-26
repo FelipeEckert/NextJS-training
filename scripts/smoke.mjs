@@ -153,6 +153,13 @@ const CHECKS = [
     contains: ["Buy and hold", "Max drawdown"],
     notContains: ["History unavailable"],
   },
+  {
+    path: "/backtest?pair=USD-BRL&kind=compare",
+    cookie: false,
+    status: 200,
+    contains: ["Compare all", "Moving-average crossover"],
+    notContains: ["History unavailable"],
+  },
 ];
 
 async function runChecks(sessionToken) {

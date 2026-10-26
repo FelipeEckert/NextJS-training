@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBacktestParams, runBacktest } from "./backtest";
+import { parseBacktestParams, parseCompareParams, runBacktest } from "./backtest";
 import type { PricePoint } from "./analysis";
 
 const pts = (closes: number[]): PricePoint[] =>
@@ -93,5 +93,54 @@ describe("parseBacktestParams", () => {
 
   it("requires whole numbers for day counts", () => {
     expect(parseBacktestParams({ lookbackDays: "2.5" }).ok).toBe(false);
+  });
+});
+
+describe("parseCompareParams", () => {
+  it("returns hold, dip and ma with the default settings, in color order", () => {
+    expect(parseCompareParams({ kind: "compare" })).toEqual({
+      ok: true,
+      pair: "USD-BRL",
+      strategies: [
+        { kind: "hold" },
+        { kind: "dip", dropPct: 2, lookbackDays: 5, takeProfitPct: 3 },
+        { kind: "ma", shortDays: 10, longDays: 30 },
+      ],
+    });
+  });
+
+  it("reports a bad dip setting", () => {
+    expect(parseCompareParams({ kind: "compare", dropPct: "-1" })).toEqual({
+      ok: false,
+      error: "dropPct must be between 0.5 and 50.",
+    });
+  });
+
+  it("reports shortDays that is not below longDays", () => {
+    expect(parseCompareParams({ kind: "compare", shortDays: "30", longDays: "30" })).toEqual({
+      ok: false,
+      error: "shortDays must be less than longDays.",
+    });
+  });
+
+  it("rejects a repeated parameter", () => {
+    expect(parseCompareParams({ kind: "compare", dropPct: ["2", "3"] })).toEqual({
+      ok: false,
+      error: "Each setting can only appear once.",
+    });
+  });
+
+  it("gives each strategy the same result as running it on its own", () => {
+    const sp = { kind: "compare", dropPct: "5", lookbackDays: "2", takeProfitPct: "4", shortDays: "2", longDays: "5" };
+    const compare = parseCompareParams(sp);
+    if (!compare.ok) throw new Error(compare.error);
+    const history = pts([10, 9, 8, 9, 12, 11, 13, 12]);
+
+    for (const strategy of compare.strategies) {
+      const single = parseBacktestParams({ ...sp, kind: strategy.kind });
+      if (!single.ok) throw new Error(single.error);
+      expect(single.strategy).toEqual(strategy);
+      expect(runBacktest(history, strategy, FROM)).toEqual(runBacktest(history, single.strategy, FROM));
+    }
   });
 });
