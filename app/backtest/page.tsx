@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
+import { EquityChart } from "@/components/EquityChart";
 import { PriceChart } from "@/components/PriceChart";
 import { type PricePoint, sliceRange } from "@/lib/analysis";
 import {
   type BacktestResult,
   DEFAULTS,
   parseBacktestParams,
+  parseCompareParams,
   runBacktest,
+  STRATEGY_LABELS,
   type Strategy,
 } from "@/lib/backtest";
 import { CATALOG } from "@/lib/currencies";
@@ -34,7 +37,7 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
   const sp = await searchParams;
   // A repeated param arrives as an array, so only a single string counts
   const field = (name: string) => (typeof sp[name] === "string" ? sp[name] : DEFAULTS[name]);
-  const parsed = parseBacktestParams(sp);
+  const parsed = sp.kind === "compare" ? parseCompareParams(sp) : parseBacktestParams(sp);
 
   return (
     <>
@@ -53,9 +56,12 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
           <label className="grid gap-1 text-sm font-medium">
             Strategy
             <select name="kind" defaultValue={field("kind")} className={inputClass}>
-              <option value="hold">Buy and hold</option>
-              <option value="dip">Buy the dip</option>
-              <option value="ma">Moving-average crossover</option>
+              {Object.entries(STRATEGY_LABELS).map(([kind, label]) => (
+                <option key={kind} value={kind}>
+                  {label}
+                </option>
+              ))}
+              <option value="compare">Compare all</option>
             </select>
           </label>
         </div>
@@ -102,7 +108,11 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
       </form>
 
       {parsed.ok ? (
-        <BacktestResults pair={parsed.pair} strategy={parsed.strategy} />
+        "strategies" in parsed ? (
+          <CompareResults pair={parsed.pair} strategies={parsed.strategies} />
+        ) : (
+          <BacktestResults pair={parsed.pair} strategy={parsed.strategy} />
+        )
       ) : (
         <p role="alert" className="mt-6 text-sm text-red-600">
           {parsed.error}
@@ -112,13 +122,8 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
   );
 }
 
-async function BacktestResults({
-  pair,
-  strategy,
-}: {
-  pair: string;
-  strategy: Strategy;
-}) {
+// Both views need the full history (indicators read it) and the first day of the last year
+async function loadBacktestWindow(pair: string): Promise<{ history: PricePoint[]; fromDate: string } | null> {
   let history: PricePoint[] = [];
   try {
     history = await getHistory(pair);
@@ -127,12 +132,26 @@ async function BacktestResults({
   }
 
   const lastYear = sliceRange(history, "1Y");
-  if (lastYear.length === 0) {
-    return <p className="mt-6 text-zinc-500">History unavailable for this currency right now.</p>;
-  }
+  if (lastYear.length === 0) return null;
+  return { history, fromDate: lastYear[0].date };
+}
+
+function HistoryUnavailable() {
+  return <p className="mt-6 text-zinc-500">History unavailable for this currency right now.</p>;
+}
+
+async function BacktestResults({
+  pair,
+  strategy,
+}: {
+  pair: string;
+  strategy: Strategy;
+}) {
+  const loaded = await loadBacktestWindow(pair);
+  if (!loaded) return <HistoryUnavailable />;
 
   // Both runs start on the same day, so the two curves line up on the chart
-  const fromDate = lastYear[0].date;
+  const { history, fromDate } = loaded;
   const result = runBacktest(history, strategy, fromDate);
   const hold = runBacktest(history, { kind: "hold" }, fromDate);
   const isHold = strategy.kind === "hold";
@@ -155,11 +174,67 @@ async function BacktestResults({
   );
 }
 
+async function CompareResults({ pair, strategies }: { pair: string; strategies: Strategy[] }) {
+  const loaded = await loadBacktestWindow(pair);
+  if (!loaded) return <HistoryUnavailable />;
+
+  const { history, fromDate } = loaded;
+  const results = strategies.map((s) => runBacktest(history, s, fromDate));
+  const series = strategies.map((s, i) => ({ label: STRATEGY_LABELS[s.kind], points: results[i].equity }));
+
+  return (
+    <>
+      <div className="mt-8 overflow-x-auto">
+        <table className="w-full text-sm tabular-nums">
+          <caption className="sr-only">Results for the last year, one row per strategy</caption>
+          <thead>
+            <tr className="border-b border-zinc-200 text-left text-zinc-500 dark:border-zinc-800">
+              <th scope="col" className="py-2 font-medium">Strategy</th>
+              <th scope="col" className="py-2 font-medium">Final value</th>
+              <th scope="col" className="py-2 font-medium">Return</th>
+              <th scope="col" className="py-2 font-medium">Trades</th>
+              <th scope="col" className="py-2 font-medium">Max drawdown</th>
+            </tr>
+          </thead>
+          <tbody>
+            {strategies.map((s, i) => {
+              const result = results[i];
+              const ret = formatReturn(result.returnPct);
+              return (
+                <tr key={s.kind} className="border-b border-zinc-200 dark:border-zinc-800">
+                  <th scope="row" className="py-2 text-left font-medium">{STRATEGY_LABELS[s.kind]}</th>
+                  <td className="py-2">{formatBRL(result.finalValue)}</td>
+                  <td className="py-2">
+                    <span className={ret.color}>{ret.text}</span>
+                  </td>
+                  <td className="py-2">{result.trades}</td>
+                  <td className="py-2">{`${result.maxDrawdownPct.toFixed(2)}%`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {series.every((s) => s.points.length >= 2) && <EquityChart series={series} />}
+
+      <p className="mt-6 text-sm text-zinc-500">
+        Simulated on daily closing prices, no spread or fees.
+      </p>
+    </>
+  );
+}
+
+// Round first, so a tiny negative return shows as flat instead of "-0.00%"
+function formatReturn(returnPct: number) {
+  const rounded = Number(returnPct.toFixed(2));
+  const sign = rounded > 0 ? "+" : "";
+  const color = rounded > 0 ? "text-green-600" : rounded < 0 ? "text-red-600" : "";
+  return { text: `${sign}${rounded.toFixed(2)}%`, color };
+}
+
 function ResultRow({ label, result }: { label: string; result: BacktestResult }) {
-  // Round first, so a tiny negative return shows as flat instead of "-0.00%"
-  const returnPct = Number(result.returnPct.toFixed(2));
-  const sign = returnPct > 0 ? "+" : "";
-  const color = returnPct > 0 ? "text-green-600" : returnPct < 0 ? "text-red-600" : "";
+  const ret = formatReturn(result.returnPct);
 
   return (
     <div>
@@ -167,7 +242,7 @@ function ResultRow({ label, result }: { label: string; result: BacktestResult })
       <dl className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Final value">{formatBRL(result.finalValue)}</Stat>
         <Stat label="Return">
-          <span className={color}>{`${sign}${returnPct.toFixed(2)}%`}</span>
+          <span className={ret.color}>{ret.text}</span>
         </Stat>
         <Stat label="Trades">{result.trades}</Stat>
         <Stat label="Max drawdown">{`${result.maxDrawdownPct.toFixed(2)}%`}</Stat>

@@ -9,6 +9,12 @@ export type Strategy =
   | { kind: "dip"; dropPct: number; lookbackDays: number; takeProfitPct: number }
   | { kind: "ma"; shortDays: number; longDays: number };
 
+export const STRATEGY_LABELS: Record<Strategy["kind"], string> = {
+  hold: "Buy and hold",
+  dip: "Buy the dip",
+  ma: "Moving-average crossover",
+};
+
 export type BacktestResult = {
   equity: PricePoint[];
   finalValue: number;
@@ -149,4 +155,15 @@ export function parseBacktestParams(
   const m = Ma.safeParse(raw);
   if (!m.success) return fail(m.error.issues[0].message);
   return { ok: true, pair, strategy: { kind, ...m.data } };
+}
+
+// Compare runs all three strategies with the same settings; the order is the chart color order
+export function parseCompareParams(
+  sp: Record<string, string | string[] | undefined>,
+): { ok: true; pair: string; strategies: Strategy[] } | { ok: false; error: string } {
+  const dip = parseBacktestParams({ ...sp, kind: "dip" });
+  if (!dip.ok) return dip;
+  const ma = parseBacktestParams({ ...sp, kind: "ma" });
+  if (!ma.ok) return ma;
+  return { ok: true, pair: dip.pair, strategies: [{ kind: "hold" }, dip.strategy, ma.strategy] };
 }
