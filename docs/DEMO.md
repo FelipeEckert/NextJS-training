@@ -6,13 +6,15 @@ A 5-minute walkthrough for showing the project live.
 
 ## Before you start
 
-- [ ] Your own account, signed up at `/signup`. You create the API key live in step 6, so keep that page ready; the key is shown once. The shared demo account cannot create keys.
-- [ ] A terminal open in the repo folder, with `python` available.
+- [ ] Your own account, signed up at `/signup`, in a **private or incognito window**. The normal window stays signed in to the shared demo account, and the demo cannot create API keys. Create your API key in the private window **before the talk**, and keep `/settings/api-keys` open there. The key is shown once, so copy it then.
+- [ ] A terminal open in the repo folder, using **Git Bash** (or WSL) with `curl` and `python` on the PATH. Rehearse every command in step 6 once there, including `python --version`. On Windows, `python` can be a Store stub that prints nothing useful; if it fails, install Python 3 and make `python` work before the talk.
 - [ ] An open pull request, or a recent one, to show the CI checks.
 - [ ] Browser tabs ready: the live app, `/docs/api`, the pull request, and its Vercel preview link.
 - [ ] The wallet chart needs a wallet at least one day old. Check the shared demo wallet before you go on. Do not reset it before the talk, because anyone can use it.
 
 ## Steps
+
+Steps 1 to 5 run in the normal window, signed in to the shared demo. Step 6 runs in the private window. The steps add up to about 5 minutes; step 5 is the one to drop if you run late.
 
 ### 1. Home, sign in, demo wallet (about 30 s)
 
@@ -26,7 +28,7 @@ Code: `app/page.tsx`, `app/login/page.tsx`, `app/auth-actions.ts` (`tryDemo`), `
 ### 2. Trade on the currency page (about 45 s)
 
 1. Open `/currency/USD-BRL`. Under the price, choose **Buy**, type `100` in the amount and click **Buy**.
-2. Choose **Sell**, tick **Sell all**, and click **Sell**.
+2. Choose the **Sell** toggle, tick **Sell all**, then click the **Sell** button at the bottom of the form. "Sell all" sells the whole USD position the shared demo holds, not only the R$ 100 you just bought.
 3. Point at the result line under the form. It shows the amount, the exact fill price (up to 10 decimals) and the time in Brasília.
 
 > "Buys fill at the ask and sells at the bid, so the spread is the house's edge. Rounding always goes down."
@@ -51,7 +53,7 @@ Code: `app/wallet/page.tsx`, `lib/portfolio.ts`, `lib/portfolio-history.ts`, `co
 
 Code: `app/leaderboard/page.tsx`, `lib/leaderboard.ts` (`rankWallets`), `lib/leaderboard-data.ts` (excludes `DEMO_USERNAME`).
 
-### 5. Backtest (about 40 s)
+### 5. Backtest (about 40 s, skip if short on time)
 
 1. Open `/backtest`. Keep the currency USD-BRL and choose the **Buy the dip** strategy with the default settings (drop 2%, lookback 5 days, take profit 3%). Click **Run backtest**.
 2. Point at the strategy row against the **Buy and hold** row, and at the equity chart. Copy the page's URL: the settings are in it, so the result is a shareable link.
@@ -62,7 +64,7 @@ Code: `app/backtest/page.tsx`, `lib/backtest.ts` (`runBacktest`, `parseBacktestP
 
 ### 6. API: a key, two identical orders, a bot (about 1 min 30 s)
 
-1. On `/settings/api-keys` (your own account), enter a name and click **Create key**. Copy it, then run `export API_KEY=ptk_...` in the terminal.
+1. Switch to the **private window**, signed in to your own account. Show `/settings/api-keys`: the key you created before the talk is already listed, with its prefix and last-used time. Do not create a key live, and do not reveal the full key. In the terminal, run `export API_KEY=ptk_...` with the key you saved.
 2. Check the wallet:
 
    ```bash

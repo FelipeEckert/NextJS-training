@@ -98,12 +98,15 @@ sequenceDiagram
         D-->>R: stored trade
     else Same key, different request hash
         D-->>R: IDEMPOTENCY_MISMATCH
-    else New key
+    else New key, rule check fails
+        R->>R: planTrade returns an error, for example insufficient cash
+        Note over R,D: nothing is written
+    else New key, rule check passes
         R->>R: planTrade checks the rules and rounds down
         R->>D: update cash, upsert or delete position, insert trade
     end
     R->>D: COMMIT
-    R-->>C: 201 new, 200 replay, 422 mismatch (API), or a message (form)
+    R-->>C: 201 new, 200 replay, 422 mismatch or rejected order (API), or a message (form)
 ```
 
 For a five-minute walkthrough of the live app, see [docs/DEMO.md](docs/DEMO.md).
