@@ -67,7 +67,7 @@ flowchart LR
     pages & actions & api -->|"Drizzle over pg"| main
     pages & actions & api -.->|"preview deployments"| dev
     gh -->|"runs on every PR"| gha
-    gh -->|"opens a PR"| preview
+    gh -->|"every PR"| preview
     gh -->|"merge to main"| prod
 ```
 

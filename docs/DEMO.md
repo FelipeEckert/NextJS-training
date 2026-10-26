@@ -131,7 +131,7 @@ Each login attempt claims a numbered slot with one atomic `UPDATE`, before the p
 File: `lib/users.ts` (`verifyLogin`), `lib/users.db.test.ts`.
 
 **What does the smoke test catch that `next build` doesn't?**
-The build does not render request-time pages, and some mistakes only fail when a page runs. Example: the Postgres driver uses `crypto.getRandomValues()`, which Next blocks during prerendering and runtime prefetch, so a page that reads the database must first call `await connection()`. The smoke test starts `next dev` and requests the real pages, so it fails if that call is missing. Commit `a703f3b`, on the `test/smoke-regression` branch, removed the call on purpose to prove the job catches it.
+The build does not render request-time pages, and some mistakes only fail when a page runs. Example: the Postgres driver uses `crypto.getRandomValues()`, which Next blocks during prerendering and runtime prefetch, so a page that reads the database must first call `await connection()`. The smoke test starts `next dev` and requests the real pages, so it fails if that call is missing. The closed pull request [#17](https://github.com/FelipeEckert/NextJS-training/pull/17) removed the call on purpose to prove it: `checks` (including `next build`) and `db` passed, and only `smoke` failed.
 File: `scripts/smoke.mjs`, `components/TradePanel.tsx`, `.github/workflows/ci.yml`.
 
 **What would you do next?**
