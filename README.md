@@ -177,6 +177,7 @@ npm run dev          # http://localhost:3000
 - `npm test`: unit tests for the pure logic (trade math, valuation, the three backtest strategies, rate-limit windows, API key format, password hashing, portfolio history). No database needed.
 - `npm run test:db`: database tests, run against the database in `.env.local`. They write rows, so use a dev database. They cover two simultaneous buys that compete for the same cash, idempotent order replay, the 3-key limit, login lockout and rate limiting.
 - `npm run smoke`: starts `next dev` on port 3100 against the database and a fake AwesomeAPI on port 3999. It seeds a test user, requests the main pages with and without a session, and fails on any server error. It reads `DATABASE_URL` and `SESSION_SECRET` from the shell, not from `.env.local`, so export both first. It also writes a test user, so use a dev database.
+- `npm run e2e`: a Playwright test that clicks through the real UI: sign up, buy USD-BRL, sell all, check the two trades in the wallet, then reset. Without `E2E_BASE_URL` it starts the fake AwesomeAPI and its own `next dev` on port 3100 (stop any other dev server in the folder first). With `E2E_BASE_URL=http://localhost:3000` it uses a dev server you already run, with the real quote API and your dev database. It creates a throwaway user each run, and sign-ups are limited to 5 per IP per hour, so repeated local runs against the same database can hit "Too many sign-ups" (CI starts from an empty database each time).
 - `npm run lint` and `npm run typecheck`: ESLint, then `next typegen` and `tsc --noEmit`.
 
 ## CI/CD
@@ -186,6 +187,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on ev
 - `checks`: `npm ci`, lint, typecheck, unit tests, and `next build`. The build runs without secrets or a database.
 - `db`: a Postgres 17 service container, migrations, then `npm run test:db`.
 - `smoke`: a Postgres 17 service container, migrations, then `npm run smoke`.
+- `e2e`: the same Postgres and environment as `smoke`, migrations, Chromium, then `npm run e2e`. On failure it uploads the Playwright report and traces as an artifact.
 
 Vercel deploys each pull request as a preview that uses the Neon `dev` branch. Merging to `main` deploys production, which uses the Neon `main` branch. `vercel.json` sets the build command to `npm run db:migrate && npm run build`, so migrations run before the new code goes live.
 

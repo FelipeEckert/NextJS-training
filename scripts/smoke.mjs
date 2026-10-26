@@ -3,10 +3,11 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import { existsSync, readFileSync, rmSync } from "node:fs";
-import { createServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
 
 import pg from "pg";
+
+import { closeServer, startFakeApi } from "./fake-awesomeapi.mjs";
 
 const { Client } = pg;
 
@@ -15,7 +16,6 @@ const APP_PORT = 3100;
 const APP = `http://127.0.0.1:${APP_PORT}`;
 const USERNAME = "smoke_trader";
 const LOG_FILE = ".next/dev/logs/next-development.log";
-const DAY_MS = 86_400_000;
 const TIMEOUT_MS = 120_000;
 
 const { DATABASE_URL, SESSION_SECRET } = process.env;
@@ -30,45 +30,6 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function mintSessionCookie(userId) {
   const payload = `${userId}.${USERNAME}.${Date.now() + 60 * 60 * 1000}`;
   return `${payload}.${createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url")}`;
-}
-
-function startFakeApi() {
-  const server = createServer((req, res) => {
-    const [root, kind, arg] = new URL(req.url, `http://127.0.0.1:${API_PORT}`).pathname
-      .split("/")
-      .filter(Boolean);
-    res.setHeader("content-type", "application/json");
-
-    if (root === "json" && kind === "last" && arg) {
-      const body = {};
-      for (const pair of arg.split(",")) {
-        body[pair.replace("-", "")] = {
-          bid: "5.0000",
-          ask: "5.0100",
-          pctChange: "0.50",
-          create_date: "2026-10-24 12:00:00",
-        };
-      }
-      res.end(JSON.stringify(body));
-    } else if (root === "json" && kind === "daily" && arg) {
-      const now = new Date();
-      const todayNoon = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12);
-      const points = Array.from({ length: 30 }, (_, i) => ({
-        bid: i % 2 === 0 ? "5.0000" : "5.1000",
-        timestamp: String(Math.floor((todayNoon - i * DAY_MS) / 1000)), // newest first
-      }));
-      res.end(JSON.stringify(points));
-    } else {
-      res.statusCode = 404;
-      res.end("{}");
-    }
-  });
-  return new Promise((resolve) => server.listen(API_PORT, "127.0.0.1", () => resolve(server)));
-}
-
-function closeServer(server) {
-  server.closeAllConnections();
-  return new Promise((resolve) => server.close(() => resolve()));
 }
 
 // Idempotent: fixed username and conflict-safe inserts, so reruns reuse the same rows
@@ -240,7 +201,7 @@ function collectServerErrors(output) {
 async function main() {
   const client = new Client({ connectionString: DATABASE_URL });
   await client.connect();
-  const api = await startFakeApi();
+  const api = await startFakeApi(API_PORT);
   let dev;
   let results = [];
   let errors = [];
