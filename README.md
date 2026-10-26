@@ -31,6 +31,7 @@ On the login page, click **Try the demo** to enter a shared demo account with on
 - Orders go through the same trade function as the web form. `POST /api/v1/orders` requires an `Idempotency-Key` header, so a retry never trades twice.
 - 60 requests per minute per key. Over the limit, the API returns `429` with `Retry-After`.
 - Errors share one JSON shape. The reference, with curl examples, is at `/docs/api`.
+- A house bot account trades USD, EUR, GBP and BTC once a day through this same API, and shows on the leaderboard with a "bot" tag.
 
 ## Architecture
 
@@ -164,6 +165,7 @@ Fill in `.env.local`. The file is git-ignored, and `.env.example` explains each 
 - `DATABASE_URL`: the pooled connection string for your dev database. The app uses it at runtime.
 - `DATABASE_URL_UNPOOLED`: the direct connection string for the same dev database. Migrations use it.
 - `AWESOMEAPI_KEY`: optional. It raises the quote API's rate limit.
+- `CRON_SECRET` and `HOUSE_BOT_API_KEY`: production only. They let Vercel Cron run the house bot, so leave them empty locally.
 
 ```bash
 npm run db:migrate   # applies the SQL in drizzle/
