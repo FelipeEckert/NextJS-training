@@ -157,7 +157,7 @@ const CHECKS = [
     path: "/backtest?pair=USD-BRL&kind=compare",
     cookie: false,
     status: 200,
-    contains: ["Compare all", "Moving-average crossover"],
+    contains: ["Results for the last year, one row per strategy", "Max drawdown"], // only the results table renders these
     notContains: ["History unavailable"],
   },
 ];

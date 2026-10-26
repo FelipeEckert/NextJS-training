@@ -184,35 +184,37 @@ async function CompareResults({ pair, strategies }: { pair: string; strategies: 
 
   return (
     <>
-      <table className="mt-8 w-full text-sm tabular-nums">
-        <caption className="sr-only">Results for the last year, one row per strategy</caption>
-        <thead>
-          <tr className="border-b border-zinc-200 text-left text-zinc-500 dark:border-zinc-800">
-            <th scope="col" className="py-2 font-medium">Strategy</th>
-            <th scope="col" className="py-2 font-medium">Final value</th>
-            <th scope="col" className="py-2 font-medium">Return</th>
-            <th scope="col" className="py-2 font-medium">Trades</th>
-            <th scope="col" className="py-2 font-medium">Max drawdown</th>
-          </tr>
-        </thead>
-        <tbody>
-          {strategies.map((s, i) => {
-            const result = results[i];
-            const ret = formatReturn(result.returnPct);
-            return (
-              <tr key={s.kind} className="border-b border-zinc-200 dark:border-zinc-800">
-                <th scope="row" className="py-2 text-left font-medium">{STRATEGY_LABELS[s.kind]}</th>
-                <td className="py-2">{formatBRL(result.finalValue)}</td>
-                <td className="py-2">
-                  <span className={ret.color}>{ret.text}</span>
-                </td>
-                <td className="py-2">{result.trades}</td>
-                <td className="py-2">{`${result.maxDrawdownPct.toFixed(2)}%`}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="mt-8 overflow-x-auto">
+        <table className="w-full text-sm tabular-nums">
+          <caption className="sr-only">Results for the last year, one row per strategy</caption>
+          <thead>
+            <tr className="border-b border-zinc-200 text-left text-zinc-500 dark:border-zinc-800">
+              <th scope="col" className="py-2 font-medium">Strategy</th>
+              <th scope="col" className="py-2 font-medium">Final value</th>
+              <th scope="col" className="py-2 font-medium">Return</th>
+              <th scope="col" className="py-2 font-medium">Trades</th>
+              <th scope="col" className="py-2 font-medium">Max drawdown</th>
+            </tr>
+          </thead>
+          <tbody>
+            {strategies.map((s, i) => {
+              const result = results[i];
+              const ret = formatReturn(result.returnPct);
+              return (
+                <tr key={s.kind} className="border-b border-zinc-200 dark:border-zinc-800">
+                  <th scope="row" className="py-2 text-left font-medium">{STRATEGY_LABELS[s.kind]}</th>
+                  <td className="py-2">{formatBRL(result.finalValue)}</td>
+                  <td className="py-2">
+                    <span className={ret.color}>{ret.text}</span>
+                  </td>
+                  <td className="py-2">{result.trades}</td>
+                  <td className="py-2">{`${result.maxDrawdownPct.toFixed(2)}%`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {series.every((s) => s.points.length >= 2) && <EquityChart series={series} />}
 
