@@ -10,6 +10,6 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: [...configDefaults.exclude, "**/*.db.test.ts"],
+    exclude: [...configDefaults.exclude, "**/*.db.test.ts", "e2e/**"],
   },
 });
