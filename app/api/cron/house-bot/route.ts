@@ -4,6 +4,8 @@ import { apiError } from "@/lib/api";
 import { runHouseBot } from "@/lib/house-bot";
 
 // Vercel Cron calls this once a day after the daily close, with Authorization: Bearer <CRON_SECRET>
+export const maxDuration = 60; // four pairs, each with up to three sequential requests
+
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || !bearerMatches(request.headers.get("authorization") ?? "", secret)) {

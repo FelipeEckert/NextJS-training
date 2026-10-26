@@ -25,7 +25,8 @@ export function decide(closes: number[], holding: boolean): "buy" | "sell" | "ho
   return "hold";
 }
 
-// One order per pair per UTC day, so a cron retry replays the same order instead of trading twice
+// One order per pair per UTC day, so a cron retry replays the same order instead of trading twice.
+// shortcut: a buy and a sell of the same pair on the same UTC day share a key, so the second gets 422 IDEMPOTENCY_MISMATCH (only if the signal flips within a day); add the side to the key if that ever matters
 export function idempotencyKey(pair: string, now: Date): string {
   return `house-bot-${now.toISOString().slice(0, 10)}-${pair}`;
 }
@@ -34,7 +35,7 @@ export function idempotencyKey(pair: string, now: Date): string {
 async function call<T>(send: typeof fetch, url: string, init: RequestInit): Promise<Outcome<T>> {
   let res: Response;
   try {
-    res = await send(url, init);
+    res = await send(url, { ...init, signal: AbortSignal.timeout(10_000) });
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : String(error) };
   }
@@ -65,7 +66,7 @@ export async function runHouseBot(opts: {
   });
   // Don't trade blind: without the wallet, no pair can be checked for a position
   if (!wallet.ok) {
-    return HOUSE_BOT_PAIRS.map(() => ({ pair: "*", action: "error", detail: wallet.detail }));
+    return HOUSE_BOT_PAIRS.map((pair) => ({ pair, action: "error", detail: wallet.detail }));
   }
 
   const results: HouseBotResult[] = [];

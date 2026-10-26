@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   decide,
   HOUSE_BOT_BUY_BRL,
+  HOUSE_BOT_PAIRS,
   type HouseBotResult,
   idempotencyKey,
   runHouseBot,
@@ -140,10 +141,74 @@ describe("runHouseBot", () => {
 
     const results: HouseBotResult[] = await run(send);
 
-    expect(results).toHaveLength(4);
+    expect(results.map((result) => result.pair)).toEqual(HOUSE_BOT_PAIRS);
     expect(results.every((result) => result.action === "error")).toBe(true);
     expect(results[0].detail).toBe("401 UNAUTHORIZED: Missing or invalid API key.");
     expect(calls.some((call) => call.method === "POST")).toBe(false);
     expect(JSON.stringify(results)).not.toContain(KEY);
+  });
+
+  it("sells the whole position when holding and the signal is falling", async () => {
+    const { send, calls } = fakeFetch((method, path) => {
+      if (path === "/api/v1/wallet") return json({ data: { positions: [{ pair: "USD-BRL" }] } });
+      if (path.startsWith("/api/v1/history/")) {
+        return json({ data: FALLING.map((close) => ({ date: "2026-10-01", close })) });
+      }
+      return trade();
+    });
+
+    const results = await run(send);
+
+    const sell = calls.find((call) => call.method === "POST");
+    expect(sell?.body).toEqual({ pair: "USD-BRL", side: "sell", quantity: "all" });
+    expect(results[0].action).toBe("sell");
+  });
+
+  it("holds without an order when holding and the signal is rising", async () => {
+    const { send, calls } = fakeFetch((method, path) => {
+      if (path === "/api/v1/wallet") return json({ data: { positions: [{ pair: "USD-BRL" }] } });
+      if (path.startsWith("/api/v1/history/")) return risingHistory();
+      return trade();
+    });
+
+    const results = await run(send);
+
+    // The other pairs are unheld, so they buy; USD-BRL must not get any order
+    const orderedPairs = calls
+      .filter((call) => call.method === "POST")
+      .map((call) => (call.body as { pair: string }).pair);
+    expect(orderedPairs).not.toContain("USD-BRL");
+    expect(results[0]).toEqual({ pair: "USD-BRL", action: "hold", detail: "no signal" });
+  });
+
+  it("reports a thrown fetch for one pair as an error and still runs the next", async () => {
+    const { send } = fakeFetch((method, path) => {
+      if (path === "/api/v1/wallet") return walletEmpty();
+      if (path === "/api/v1/history/USD-BRL") throw new Error("socket hang up");
+      if (path.startsWith("/api/v1/history/")) return risingHistory();
+      return trade();
+    });
+
+    const results = await run(send);
+
+    expect(results[0]).toEqual({ pair: "USD-BRL", action: "error", detail: "socket hang up" });
+    expect(results[1].pair).toBe("EUR-BRL");
+    expect(results[1].action).toBe("buy");
+  });
+
+  it("says already done today when the order replays with a 200", async () => {
+    const { send } = fakeFetch((method, path) => {
+      if (path === "/api/v1/wallet") return walletEmpty();
+      if (path.startsWith("/api/v1/history/")) return risingHistory();
+      return json(
+        { data: { side: "buy", quantity: "2000.0000000000", price: "5.0000", total: "10000.00" } },
+        200,
+      );
+    });
+
+    const results = await run(send);
+
+    expect(results[0].action).toBe("buy");
+    expect(results[0].detail.startsWith("already done today:")).toBe(true);
   });
 });

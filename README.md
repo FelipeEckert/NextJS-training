@@ -165,7 +165,7 @@ Fill in `.env.local`. The file is git-ignored, and `.env.example` explains each 
 - `DATABASE_URL`: the pooled connection string for your dev database. The app uses it at runtime.
 - `DATABASE_URL_UNPOOLED`: the direct connection string for the same dev database. Migrations use it.
 - `AWESOMEAPI_KEY`: optional. It raises the quote API's rate limit.
-- `CRON_SECRET` and `HOUSE_BOT_API_KEY`: production only. They let Vercel Cron run the house bot, so leave them empty locally.
+- `CRON_SECRET` and `HOUSE_BOT_API_KEY`: set these for the Production environment only, not Preview. They let Vercel Cron run the house bot, so leave them empty locally.
 
 ```bash
 npm run db:migrate   # applies the SQL in drizzle/
