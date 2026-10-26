@@ -32,6 +32,82 @@ On the login page, click **Try the demo** to enter a shared demo account with on
 - 60 requests per minute per key. Over the limit, the API returns `429` with `Retry-After`.
 - Errors share one JSON shape. The reference, with curl examples, is at `/docs/api`.
 
+## Architecture
+
+The browser and a bot on your machine both reach the same Next.js app. It reads prices from AwesomeAPI and keeps wallets in Postgres. GitHub and Vercel handle delivery.
+
+```mermaid
+flowchart LR
+    browser["Browser"]
+    bot["Your bot<br/>examples/bot.py, on your machine"]
+    gh["GitHub pull request"]
+    awesome["AwesomeAPI<br/>quotes and daily history"]
+    gha["GitHub Actions<br/>checks, db, smoke"]
+
+    subgraph vercel["Vercel"]
+        subgraph nextjs["Next.js 16 app"]
+            proxy["proxy.ts<br/>optimistic auth redirect, unknown pair 404"]
+            pages["Pages<br/>Server Components"]
+            actions["Server Actions<br/>login, signup, trade, keys"]
+            api["Route Handlers /api/v1/*<br/>behind withApiKey"]
+        end
+        preview["Preview deployment"]
+        prod["Production deployment<br/>build runs db:migrate first"]
+    end
+
+    subgraph neon["Neon Postgres"]
+        main[("main branch<br/>production")]
+        dev[("dev branch<br/>previews and local runs")]
+    end
+
+    browser --> proxy --> pages
+    browser --> actions
+    bot -->|"Authorization: Bearer, Idempotency-Key"| api
+    pages & actions & api -->|"quotes cached 1 min, history cached hours"| awesome
+    pages & actions & api -->|"Drizzle over pg"| main
+    pages & actions & api -.->|"preview deployments"| dev
+    gh -->|"runs on every PR"| gha
+    gh -->|"opens a PR"| preview
+    gh -->|"merge to main"| prod
+```
+
+Every order takes the same path, whether it comes from the form or from the API:
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R as Server Action or Route Handler
+    participant A as Auth and rate limit
+    participant Q as getTradeQuote
+    participant D as Postgres
+
+    C->>R: buy or sell
+    alt Form submit
+        R->>A: session cookie, checked by getCurrentUser
+    else Bot request
+        R->>A: Bearer API key, checked by withApiKey
+        A->>A: 60 requests per minute per key, else 429
+    end
+    R->>R: validate input with zod
+    R->>Q: quote for the pair
+    Q-->>R: bid and ask, or unavailable when older than 120 s
+    R->>D: BEGIN
+    R->>D: SELECT wallet FOR UPDATE
+    R->>D: look up trade by user and Idempotency-Key
+    alt Same key, same request hash
+        D-->>R: stored trade
+    else Same key, different request hash
+        D-->>R: IDEMPOTENCY_MISMATCH
+    else New key
+        R->>R: planTrade checks the rules and rounds down
+        R->>D: update cash, upsert or delete position, insert trade
+    end
+    R->>D: COMMIT
+    R-->>C: 201 new, 200 replay, 422 mismatch (API), or a message (form)
+```
+
+For a five-minute walkthrough of the live app, see [docs/DEMO.md](docs/DEMO.md).
+
 ## How it works
 
 Next.js 16 (App Router, Cache Components, Server Actions, Route Handlers), React 19, TypeScript, Tailwind CSS 4, Postgres on Neon with Drizzle ORM over `pg`, zod for input validation, Vitest for tests, deployed on Vercel. The design doc and the implementation plan are in `docs/superpowers/`.
