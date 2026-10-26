@@ -2,7 +2,8 @@ import { defineConfig } from "@playwright/test";
 
 // With E2E_BASE_URL set (a dev server you already run), nothing is started here.
 // Without it, the config starts the fake AwesomeAPI and its own `next dev` on port 3100.
-const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3100";
+// localhost, not 127.0.0.1: next dev blocks its dev resources (and so hydration) for other origins
+const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3100";
 
 export default defineConfig({
   testDir: "e2e",
@@ -27,7 +28,7 @@ export default defineConfig({
         },
         {
           command: "npx next dev -p 3100",
-          url: "http://127.0.0.1:3100/login",
+          url: "http://localhost:3100/login",
           timeout: 180_000,
           reuseExistingServer: false,
           stdout: "pipe", // shows the dev server's output in the CI log if it crashes
