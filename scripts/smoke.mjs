@@ -184,6 +184,7 @@ const CHECKS = [
     notContains: ["temporarily unavailable"],
   },
   { path: "/docs/api", cookie: false, status: 200, contains: ["Idempotency-Key"] },
+  { path: "/api/cron/house-bot", cookie: false, status: 401 },
   {
     path: "/backtest?pair=USD-BRL&kind=dip",
     cookie: false,

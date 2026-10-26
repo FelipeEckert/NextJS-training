@@ -5,6 +5,7 @@ import { formatBRL } from "@/lib/format";
 import { rankWallets } from "@/lib/leaderboard";
 import { getAllWallets } from "@/lib/leaderboard-data";
 import { parseDecimal, QTY_SCALE } from "@/lib/money";
+import { HOUSE_BOT_USERNAME } from "@/lib/house-bot";
 import { getQuotes } from "@/lib/quotes";
 
 export const metadata: Metadata = { title: "Leaderboard" };
@@ -65,7 +66,14 @@ async function LeaderboardTable() {
             return (
               <tr key={row.username} className="border-t border-zinc-200 dark:border-zinc-800">
                 <td className="py-2 pr-4">{index + 1}</td>
-                <td className="py-2 pr-4 font-medium">{row.username}</td>
+                <td className="py-2 pr-4 font-medium">
+                  {row.username}
+                  {row.username === HOUSE_BOT_USERNAME && (
+                    <span className="ml-2 rounded border border-zinc-300 px-1.5 py-0.5 text-xs font-normal text-zinc-500 dark:border-zinc-700">
+                      bot
+                    </span>
+                  )}
+                </td>
                 <td className="py-2 pr-4">{formatBRL(row.totalCents / 100)}</td>
                 <td className="py-2">
                   <span className={gainClass(shown)}>{`${plus(shown)}${shown.toFixed(2)}%`}</span>

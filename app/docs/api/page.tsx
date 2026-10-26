@@ -252,6 +252,14 @@ Cache-Control: no-store`}</Code>
         </p>
         <Code>{`API_KEY=... python examples/bot.py`}</Code>
       </Section>
+
+      <Section title="House bot">
+        <p className="mt-3">
+          A bot account trades USD, EUR, GBP and BTC against BRL once a day through this same API
+          (<code>lib/house-bot.ts</code> in the repository). It appears on the leaderboard with a
+          &quot;bot&quot; tag.
+        </p>
+      </Section>
     </main>
   );
 }
