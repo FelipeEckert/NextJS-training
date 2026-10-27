@@ -8,7 +8,7 @@ A paper-trading app built with Next.js 16 and Postgres. Every account starts wit
 
 On the login page, click **Try the demo** to enter a shared demo account with one click. Anyone can reset that wallet, so the demo account is left off the leaderboard and cannot create API keys. To get your own wallet and API key, create an account at `/signup`.
 
-![Demo: the live ticker on the home page, a slide to the USD page, the chart crosshair, a R$ 100 buy, the wallet reveal and the leaderboard with your row highlighted](docs/demo.gif)
+![Demo: the home hero with the spinning cash-flow globe, the priced currencies list filtered to crypto, the USD page with the chart crosshair, a R$ 100 buy, the wallet with the new position and a switch to the dark theme](docs/demo.gif)
 
 ## Features
 

@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Exchange Rates",
+  title: { default: "Exchange Rates", template: "%s · Exchange Rates" },
   description: "US dollar, euro, pound and bitcoin in Brazilian reais, updated every minute.",
 };
 

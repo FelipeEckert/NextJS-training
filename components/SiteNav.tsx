@@ -13,9 +13,10 @@ const LINKS = [
   ["/currencies", "All currencies"],
 ] as const;
 
-const ACTIVE = "rounded-md bg-zinc-100 px-2.5 py-1.5 text-sm font-medium text-foreground dark:bg-zinc-800/70";
+const ACTIVE =
+  "whitespace-nowrap rounded-md bg-zinc-100 px-2 py-1.5 text-sm font-medium text-foreground dark:bg-zinc-800/70";
 const INACTIVE =
-  "rounded-md px-2.5 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-foreground dark:text-zinc-400 dark:hover:bg-zinc-800/50";
+  "whitespace-nowrap rounded-md px-2 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-foreground dark:text-zinc-400 dark:hover:bg-zinc-800/50";
 
 function NavList({
   pathname,
@@ -66,7 +67,7 @@ export function SiteNav({ account }: { account: ReactNode }) {
   return (
     <>
       {/* lg and up: links on the left, account on the right */}
-      <div className="hidden flex-1 items-center justify-between gap-4 lg:flex">
+      <div className="hidden flex-1 items-center justify-between gap-3 lg:flex">
         <NavList pathname={pathname} onNavigate={close} className="flex items-center gap-1" />
         {account}
       </div>

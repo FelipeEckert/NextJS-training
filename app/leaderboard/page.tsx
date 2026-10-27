@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense, type CSSProperties } from "react";
 import { DeltaChip } from "@/components/DeltaChip";
+import { EmptyState } from "@/components/EmptyState";
 import { formatBRL } from "@/lib/format";
 import { rankWallets } from "@/lib/leaderboard";
 import { getAllWallets } from "@/lib/leaderboard-data";
@@ -28,7 +29,12 @@ const UNAVAILABLE = <p className="mt-6 text-zinc-500">Leaderboard temporarily un
 async function LeaderboardTable() {
   await connection(); // the DB driver draws random bytes; defer them to request time
   const [wallets, user] = await Promise.all([getAllWallets(), getCurrentUser()]);
-  if (wallets.length === 0) return <p className="mt-6 text-zinc-500">No traders yet.</p>;
+  if (wallets.length === 0)
+    return (
+      <EmptyState title="No traders yet." action={{ href: "/currencies", label: "Make the first trade" }}>
+        Buy any currency and you are on the board.
+      </EmptyState>
+    );
 
   // Prices only for pairs somebody holds. If the quote API is down, the leaderboard is unavailable
   const pairs = [
