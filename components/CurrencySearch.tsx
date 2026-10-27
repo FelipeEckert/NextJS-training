@@ -68,9 +68,9 @@ export function CurrencySearch({ currencies, quotes }: { currencies: Currency[];
       {matches.length === 0 ? (
         <p className="mt-6 text-zinc-500">No currency matches &quot;{query}&quot;.</p>
       ) : (
-        <div className="mt-6 grid gap-8">
+        <div className="mt-6 flex flex-col gap-8">
           {sections.map(({ group, items }) => (
-            <section key={group.name}>
+            <section key={group.name} className="min-w-0">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 {group.name} · {items.length}
               </h2>
@@ -92,7 +92,7 @@ export function CurrencySearch({ currencies, quotes }: { currencies: Currency[];
                         </span>
                         <span className="min-w-0 flex-1 truncate font-medium">{c.name}</span>
                         {quote && (
-                          <span className="flex shrink-0 items-center gap-3">
+                          <span className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
                             <span className="tabular-nums">{formatBRL(quote.price)}</span>
                             <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>
                           </span>
