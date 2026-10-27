@@ -68,10 +68,10 @@ async function CurrencyDetails({
     month: "short",
     day: "numeric",
   });
-  // Rounded like the text, so the arrow and the "+" never disagree with the number shown
-  const change = Number(summary.change.toFixed(2));
+  // Direction comes from the rounded percent, so the R$ change and the percent always agree
+  const percent = Number(summary.changePct.toFixed(2));
   // Show "+" only for a real gain, so a flat period reads as zero
-  const sign = change > 0 ? "+" : "";
+  const sign = percent > 0 ? "+" : "";
 
   return (
     <>
@@ -93,7 +93,7 @@ async function CurrencyDetails({
 
       <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Stat label="Change">
-          <DeltaChip value={change}>
+          <DeltaChip value={percent}>
             {`${sign}${formatBRL(summary.change)} (${sign}${summary.changePct.toFixed(2)}%)`}
           </DeltaChip>
         </Stat>

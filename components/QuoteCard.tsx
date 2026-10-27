@@ -13,8 +13,9 @@ type QuoteCardProps = {
 
 // Props arrive as one object, which we destructure right in the parameter
 export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
-  // Rounded like the text, so the arrow never disagrees with the number shown
+  // Rounded like the text, so the arrow and the sign never disagree with the number shown
   const shown = Number(change.toFixed(2));
+  const sign = shown > 0 ? "+" : "";
 
   return (
     <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
@@ -29,7 +30,7 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
       <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(price)}</p>
 
       <p>
-        <DeltaChip value={shown}>{`${change.toFixed(2)}%`}</DeltaChip>
+        <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>
       </p>
     </div>
   );

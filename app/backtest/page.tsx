@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
+import { DeltaChip } from "@/components/DeltaChip";
 import { EquityChart } from "@/components/EquityChart";
 import { PriceChart } from "@/components/PriceChart";
 import { type PricePoint, sliceRange } from "@/lib/analysis";
@@ -12,7 +13,6 @@ import {
   STRATEGY_LABELS,
   type Strategy,
 } from "@/lib/backtest";
-import { DeltaChip } from "@/components/DeltaChip";
 import { CATALOG } from "@/lib/currencies";
 import { formatBRL } from "@/lib/format";
 import { getHistory } from "@/lib/history";

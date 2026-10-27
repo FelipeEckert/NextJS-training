@@ -5,8 +5,8 @@
   --foreground: #171717;
   --accent: var(--color-indigo-600);
   --accent-hover: var(--color-indigo-700);
-  --gain: var(--color-green-700);
-  --loss: var(--color-red-600);
+  --gain: var(--color-green-800);
+  --loss: var(--color-red-700);
 }
 
 @theme inline {

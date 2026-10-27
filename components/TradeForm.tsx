@@ -101,7 +101,7 @@ export function TradeForm({
 
       {/* role="alert" makes screen readers announce the result right away */}
       {state?.message && (
-        <p role="alert" className={`text-sm ${state.ok ? "text-green-600" : "text-red-600"}`}>
+        <p role="alert" className={`text-sm ${state.ok ? "text-gain" : "text-red-600"}`}>
           {state.message}
         </p>
       )}
@@ -109,7 +109,7 @@ export function TradeForm({
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent px-4 py-2 font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+        className="rounded-lg bg-accent px-4 py-2 font-medium text-white enabled:hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "Placing order…" : side === "buy" ? "Buy" : "Sell"}
       </button>

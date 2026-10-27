@@ -8,10 +8,10 @@ export function DeltaChip({ value, children }: { value: number; children: ReactN
       ? "text-gain bg-gain/10"
       : value < 0
         ? "text-loss bg-loss/10"
-        : "text-zinc-500 bg-zinc-500/10";
+        : "text-zinc-600 dark:text-zinc-400 bg-zinc-500/10";
 
   return (
-    <span className={`rounded-md px-1.5 py-0.5 text-sm font-medium tabular-nums ${tone}`}>
+    <span className={`whitespace-nowrap rounded-md px-1.5 py-0.5 text-sm font-medium tabular-nums ${tone}`}>
       {arrow && <span aria-hidden="true">{arrow} </span>}
       {children}
     </span>
