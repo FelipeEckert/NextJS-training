@@ -12,3 +12,11 @@ export function brlFormatOptions(value: number) {
 export function formatBRL(value: number) {
   return value.toLocaleString("en-US", brlFormatOptions(value));
 }
+
+// Takes a plain decimal string (formatDecimal output). Small quantities keep 4 significant digits
+export function formatQuantity(value: string): string {
+  const n = Number(value);
+  if (Math.abs(n) >= 1) return n.toLocaleString("en-US", { maximumFractionDigits: 4 });
+  if (n !== 0) return n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
+  return "0";
+}

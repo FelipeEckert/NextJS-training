@@ -5,6 +5,8 @@ import { resetWalletAction } from "@/app/trade-actions";
 
 const buttonClass =
   "rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900";
+const destructiveClass =
+  "rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40";
 
 // Two steps, so one stray click can't wipe the whole wallet
 export function ResetWalletButton() {
@@ -12,7 +14,7 @@ export function ResetWalletButton() {
 
   if (!confirming) {
     return (
-      <button type="button" onClick={() => setConfirming(true)} className={buttonClass}>
+      <button type="button" onClick={() => setConfirming(true)} className={destructiveClass}>
         Reset wallet
       </button>
     );
