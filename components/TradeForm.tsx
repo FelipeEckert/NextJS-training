@@ -22,6 +22,14 @@ export function TradeForm({
   const [sellAll, setSellAll] = useState(false);
   const [state, formAction, isPending] = useActionState(trade, null);
 
+  // Each new result bumps this id, so the success check replays its draw-in for every order
+  const [seenState, setSeenState] = useState(state);
+  const [resultId, setResultId] = useState(0);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state?.ok) setResultId((id) => id + 1);
+  }
+
   // One key per order: a resend of the same order reuses it, so the server can't fill it twice.
   // Generated lazily in the submit handler, never during render.
   const keyRef = useRef<string | null>(null);
@@ -50,7 +58,18 @@ export function TradeForm({
       <input type="hidden" name="pair" value={pair} />
       <input type="hidden" name="side" value={side} />
 
-      <div className="flex gap-2" role="group" aria-label="Order side">
+      <div
+        className="relative inline-grid grid-cols-2 rounded-lg border border-zinc-300 dark:border-zinc-700"
+        role="group"
+        aria-label="Order side"
+      >
+        {/* The pill sits behind the buttons and slides to the right half for Sell */}
+        <span
+          aria-hidden="true"
+          className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-md bg-accent transition-transform duration-200 ease-out ${
+            side === "sell" ? "translate-x-full" : ""
+          }`}
+        />
         {(["buy", "sell"] as const).map((option) => (
           <button
             key={option}
@@ -60,10 +79,8 @@ export function TradeForm({
               if (option !== side) keyRef.current = null;
               setSide(option);
             }}
-            className={`rounded-lg px-4 py-2 font-medium ${
-              side === option
-                ? "bg-accent text-white"
-                : "border border-zinc-300 dark:border-zinc-700"
+            className={`relative rounded-md px-4 py-2 font-medium transition-[color,transform] motion-safe:active:scale-[0.97] ${
+              side === option ? "text-white" : ""
             }`}
           >
             {option === "buy" ? "Buy" : "Sell"}
@@ -99,18 +116,50 @@ export function TradeForm({
         </label>
       )}
 
-      {/* role="alert" makes screen readers announce the result right away */}
       {state?.message && (
-        <p role="alert" className={`text-sm ${state.ok ? "text-gain" : "text-red-600"}`}>
-          {state.message}
-        </p>
+        <div className="flex items-center gap-2">
+          {state.ok && (
+            <svg
+              key={resultId}
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="size-5 shrink-0 text-gain"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2.5} fill="none" />
+              <path
+                pathLength={1}
+                className="animate-check-draw"
+                d="M7.5 12.5l3 3 6-6.5"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+          {/* role="alert" makes screen readers announce the result right away */}
+          <p role="alert" className={`text-sm ${state.ok ? "text-gain" : "text-red-600"}`}>
+            {state.message}
+          </p>
+        </div>
       )}
 
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent px-4 py-2 font-medium text-white enabled:hover:bg-accent-hover disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-white transition-transform motion-safe:active:scale-[0.97] enabled:hover:bg-accent-hover disabled:opacity-50"
       >
+        {isPending && (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 motion-safe:animate-spin" fill="none">
+            <path
+              d="M22 12A10 10 0 1 1 12 2"
+              stroke="currentColor"
+              strokeWidth={3}
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
         {isPending ? "Placing order…" : side === "buy" ? "Buy" : "Sell"}
       </button>
     </form>
