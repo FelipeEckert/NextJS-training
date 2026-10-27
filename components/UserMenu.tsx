@@ -24,23 +24,29 @@ export async function UserMenu() {
 
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
-      <span className="flex items-center gap-2">
+      <span className="flex min-w-0 items-center gap-2">
         <span
           aria-hidden="true"
           className="grid size-7 place-items-center rounded-full bg-brand text-xs font-semibold text-white"
         >
           {user.username.slice(0, 1).toUpperCase()}
         </span>
-        <span className="text-zinc-600 dark:text-zinc-400">
+        <span title={user.username} className="max-w-28 truncate text-zinc-600 dark:text-zinc-400">
           <span className="sr-only">Signed in as </span>
           {user.username}
         </span>
       </span>
-      <Link href="/settings/api-keys" className="font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400">
+      <Link
+        href="/settings/api-keys"
+        className="whitespace-nowrap font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400"
+      >
         API keys
       </Link>
       <form action={logout}>
-        <button type="submit" className="font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400">
+        <button
+          type="submit"
+          className="whitespace-nowrap font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400"
+        >
           Sign out
         </button>
       </form>
