@@ -32,16 +32,17 @@ export function EquityChart({ series }: { series: { label: string; points: Price
         aria-label={`Equity of ${list} from ${first.date} to ${last.date}`}
       >
         {series.map((s, i) => (
-          <path
-            key={s.label}
-            d={buildLinePath(s.points.map((p) => p.close), WIDTH, HEIGHT, domain)}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeDasharray={STYLES[i].dash}
-            vectorEffect="non-scaling-stroke"
-            className={STYLES[i].color}
-          />
+          <g key={s.label} className="chart-reveal" style={{ animationDelay: `${i * 120}ms` }}>
+            <path
+              d={buildLinePath(s.points.map((p) => p.close), WIDTH, HEIGHT, domain)}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeDasharray={STYLES[i].dash}
+              vectorEffect="non-scaling-stroke"
+              className={STYLES[i].color}
+            />
+          </g>
         ))}
       </svg>
 

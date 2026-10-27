@@ -24,3 +24,17 @@ export function buildLinePath(
     })
     .join(" ");
 }
+
+// The line closed down to the bottom edge, for the gradient fill under it
+export function buildAreaPath(
+  values: number[],
+  width: number,
+  height: number,
+  domain?: [min: number, max: number],
+): string {
+  if (values.length === 0) return "";
+
+  const lastX = values.length === 1 ? 0 : width;
+  const line = buildLinePath(values, width, height, domain);
+  return `${line} L${lastX},${height} L0,${height} Z`;
+}
