@@ -400,7 +400,8 @@ function allocationSegments(
     .slice(POSITION_COLORS.length)
     .reduce((sum, row) => sum + row.valueCents, 0);
   if (otherCents > 0) segments.push({ label: "Other", cents: otherCents, color: "bg-zinc-400" });
-  segments.push({ label: "Cash", cents: cashCents, color: "bg-zinc-300 dark:bg-zinc-600" });
+  // A fully invested wallet shows no empty "Cash 0.0%" sliver
+  if (cashCents > 0) segments.push({ label: "Cash", cents: cashCents, color: "bg-zinc-300 dark:bg-zinc-600" });
   return segments.map((s) => ({ ...s, pct: (s.cents / totalCents) * 100 }));
 }
 
