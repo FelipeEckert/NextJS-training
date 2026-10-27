@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, ViewTransition, type CSSProperties, type ReactNode } from "react";
 import { DeltaChip } from "@/components/DeltaChip";
 import { PriceChart } from "@/components/PriceChart";
 import { ResetWalletButton } from "@/components/ResetWalletButton";
@@ -23,8 +23,16 @@ export default function WalletPage() {
   return (
     <main className="mx-auto w-full max-w-5xl p-8">
       <h1 className="text-3xl font-bold">Your wallet</h1>
-      <Suspense fallback={<p className="mt-6 text-zinc-500">Loading your wallet…</p>}>
-        <WalletDetails />
+      <Suspense
+        fallback={
+          <ViewTransition exit="slide-down" default="none">
+            <WalletSkeleton />
+          </ViewTransition>
+        }
+      >
+        <ViewTransition enter="slide-up" default="none">
+          <WalletDetails />
+        </ViewTransition>
       </Suspense>
     </main>
   );
@@ -138,10 +146,14 @@ async function WalletDetails() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {rows.map((row, index) => {
                 const quantity = Number(formatDecimal(row.quantity, QTY_SCALE));
                 return (
-                  <tr key={row.pair} className="border-t border-zinc-200 dark:border-zinc-800">
+                  <tr
+                    key={row.pair}
+                    className="stagger-row border-t border-zinc-200 dark:border-zinc-800"
+                    style={{ "--i": index } as CSSProperties}
+                  >
                     <td className="py-2 pr-4 font-medium">
                       <Link href={`/currency/${row.pair}`} className="hover:underline">
                         {findCurrency(row.pair)!.code}
@@ -189,8 +201,12 @@ async function WalletDetails() {
               </tr>
             </thead>
             <tbody>
-              {trades.map((trade) => (
-                <tr key={trade.id} className="border-t border-zinc-200 dark:border-zinc-800">
+              {trades.map((trade, index) => (
+                <tr
+                  key={trade.id}
+                  className="stagger-row border-t border-zinc-200 dark:border-zinc-800"
+                  style={{ "--i": index } as CSSProperties}
+                >
                   <td className="py-2 pr-4">
                     {trade.createdAt.toLocaleString("en-US", {
                       timeZone: "America/Sao_Paulo",
@@ -214,6 +230,33 @@ async function WalletDetails() {
 
       <div className="mt-10">
         <ResetWalletButton />
+      </div>
+    </>
+  );
+}
+
+// Mirrors the loaded layout so nothing jumps when the data arrives
+const BAR = "rounded bg-zinc-200 dark:bg-zinc-800";
+
+function WalletSkeleton() {
+  return (
+    <>
+      <p className="sr-only">Loading your wallet…</p>
+      <div aria-hidden="true" className="animate-pulse">
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+              <div className={`h-4 w-24 ${BAR}`} />
+              <div className={`mt-2 h-6 w-32 ${BAR}`} />
+            </div>
+          ))}
+        </div>
+        <div className={`mt-10 h-48 ${BAR}`} />
+        <div className="mt-10 space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className={`h-8 ${BAR}`} />
+          ))}
+        </div>
       </div>
     </>
   );

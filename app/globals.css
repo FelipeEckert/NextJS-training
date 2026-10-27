@@ -103,6 +103,18 @@ body {
     400ms ease-in-out both vt-slide;
 }
 
+/* The skeleton exits fast and the content enters after it, so the handoff reads in order */
+::view-transition-old(.slide-down) {
+  animation:
+    150ms ease-out both vt-fade reverse,
+    150ms ease-out both vt-slide-y reverse;
+}
+::view-transition-new(.slide-up) {
+  animation:
+    210ms ease-in 150ms both vt-fade,
+    400ms ease-in both vt-slide-y;
+}
+
 @keyframes vt-fade {
   from {
     filter: blur(3px);
@@ -120,6 +132,15 @@ body {
   }
   to {
     translate: 0;
+  }
+}
+
+@keyframes vt-slide-y {
+  from {
+    translate: 0 10px;
+  }
+  to {
+    translate: 0 0;
   }
 }
 
@@ -167,5 +188,24 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .chart-reveal {
     animation: chart-reveal 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* Rows fade in one after another; the cap keeps long tables from waiting */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stagger-row {
+    animation: row-in 300ms ease-out both;
+    animation-delay: calc(min(var(--i, 0), 10) * 40ms);
   }
 }
