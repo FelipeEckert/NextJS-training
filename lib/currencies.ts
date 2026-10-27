@@ -66,6 +66,17 @@ export const CATALOG: Currency[] = NAMES.map(([code, name]) => ({
   label: `${name} (${code})`,
 }));
 
+export type CurrencyGroup = { name: string; codes: string[] };
+
+// Every catalog code belongs to exactly one group (checked in currencies.test.ts)
+export const GROUPS: CurrencyGroup[] = [
+  { name: "Major currencies", codes: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD", "CNY"] },
+  { name: "Latin America", codes: ["ARS", "MXN", "CLP", "COP", "PEN", "UYU", "PYG", "BOB", "CRC", "VEF"] },
+  { name: "Other currencies", codes: ["ILS", "SGD", "AED", "DKK", "HKD", "NOK", "PLN", "SAR", "SEK", "THB", "TRY", "TWD", "ZAR", "RUB", "INR", "RSD", "KRW", "RON", "EGP", "KES", "PHP", "HUF", "CZK"] },
+  { name: "Crypto", codes: ["BTC", "ETH", "SOL", "BNB", "XRP", "LTC", "DOGE", "BRETT"] },
+  { name: "Metals", codes: ["XAU", "XAG"] },
+];
+
 export const PAIRS: string[] = CATALOG.map((c) => c.pair);
 
 // The pairs shown on the home page and prerendered at build time

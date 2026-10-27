@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CATALOG, FEATURED_PAIRS, PAIRS, filterCurrencies, findCurrency } from "./currencies";
+import { CATALOG, FEATURED_PAIRS, GROUPS, PAIRS, filterCurrencies, findCurrency } from "./currencies";
 
 describe("catalog", () => {
   it("has 52 unique currencies quoted in BRL", () => {
@@ -15,6 +15,13 @@ describe("catalog", () => {
   it("features four pairs that are all in the catalog", () => {
     expect(FEATURED_PAIRS).toEqual(["USD-BRL", "EUR-BRL", "BTC-BRL", "GBP-BRL"]);
     for (const p of FEATURED_PAIRS) expect(PAIRS).toContain(p);
+  });
+});
+
+describe("groups", () => {
+  it("puts every catalog code in exactly one group, and only catalog codes", () => {
+    const codes = GROUPS.flatMap((g) => g.codes);
+    expect(codes.sort()).toEqual(CATALOG.map((c) => c.code).sort());
   });
 });
 
