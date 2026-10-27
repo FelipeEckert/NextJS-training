@@ -23,7 +23,7 @@ export async function UserMenu() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm">
+    <div className="flex flex-wrap items-center gap-2 text-sm">
       <span className="flex min-w-0 items-center gap-2">
         <span
           aria-hidden="true"
@@ -31,7 +31,7 @@ export async function UserMenu() {
         >
           {user.username.slice(0, 1).toUpperCase()}
         </span>
-        <span title={user.username} className="max-w-28 truncate text-zinc-600 dark:text-zinc-400">
+        <span title={user.username} className="max-w-20 truncate text-zinc-600 dark:text-zinc-400">
           <span className="sr-only">Signed in as </span>
           {user.username}
         </span>
