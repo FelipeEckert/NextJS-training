@@ -16,6 +16,7 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@number-flow/react": "0.6.2",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.2",
     "pg": "^8.23.1",
