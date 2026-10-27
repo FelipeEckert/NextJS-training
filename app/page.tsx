@@ -1,6 +1,7 @@
 import { io } from "next/cache";
 import Link from "next/link";
 import { DeltaChip } from "@/components/DeltaChip";
+import { HomeHero } from "@/components/HomeHero";
 import { QuoteCard } from "@/components/QuoteCard";
 import { RefreshButton } from "@/components/RefreshButton";
 import { TickerTape } from "@/components/TickerTape";
@@ -36,8 +37,9 @@ export default async function Home() {
           })}
         </TickerTape>
       )}
-      <h1 className="mt-6 text-3xl font-bold">Exchange Rates</h1>
-      <p className="mt-2 text-zinc-500">Live rates in Brazilian reais, updated every minute.</p>
+      <HomeHero />
+      <h2 className="mt-14 text-2xl font-semibold">Live rates</h2>
+      <p className="mt-2 text-zinc-500">In Brazilian reais, updated every minute.</p>
       <Link href="/currencies" className="mt-2 inline-block text-sm font-medium hover:underline">
         Browse all 52 currencies →
       </Link>
