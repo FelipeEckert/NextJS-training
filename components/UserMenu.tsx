@@ -8,11 +8,14 @@ export async function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-4 text-sm">
-        <Link href="/login" className="font-medium hover:underline">
+      <div className="flex items-center gap-3 text-sm">
+        <Link href="/login" className="font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400">
           Sign in
         </Link>
-        <Link href="/signup" className="font-medium hover:underline">
+        <Link
+          href="/signup"
+          className="rounded-lg bg-brand px-3 py-1.5 font-medium text-white shadow-md shadow-indigo-500/20 hover:brightness-110"
+        >
           Sign up
         </Link>
       </div>
@@ -20,13 +23,24 @@ export async function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span className="text-zinc-500">Signed in as {user.username}</span>
-      <Link href="/settings/api-keys" className="font-medium hover:underline">
+    <div className="flex flex-wrap items-center gap-3 text-sm">
+      <span className="flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className="grid size-7 place-items-center rounded-full bg-brand text-xs font-semibold text-white"
+        >
+          {user.username.slice(0, 1).toUpperCase()}
+        </span>
+        <span className="text-zinc-600 dark:text-zinc-400">
+          <span className="sr-only">Signed in as </span>
+          {user.username}
+        </span>
+      </span>
+      <Link href="/settings/api-keys" className="font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400">
         API keys
       </Link>
       <form action={logout}>
-        <button type="submit" className="font-medium hover:underline">
+        <button type="submit" className="font-medium text-zinc-600 hover:text-foreground dark:text-zinc-400">
           Sign out
         </button>
       </form>

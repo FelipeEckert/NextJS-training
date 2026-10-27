@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
 import { Logo } from "@/components/Logo";
+import { SiteNav } from "@/components/SiteNav";
 import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
 
@@ -33,35 +34,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           style={{ viewTransitionName: "site-header" }}
           className="sticky top-0 z-20 border-b border-zinc-200 bg-background/80 backdrop-blur dark:border-zinc-800"
         >
-          <nav className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 p-4">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link href="/" className="flex items-center gap-2 font-bold">
-                <Logo className="size-7" />
-                Exchange Rates
-              </Link>
-              <Link href="/favorites" className="text-sm font-medium hover:underline">
-                Favorites
-              </Link>
-              <Link href="/wallet" className="text-sm font-medium hover:underline">
-                Wallet
-              </Link>
-              <Link href="/leaderboard" className="text-sm font-medium hover:underline">
-                Leaderboard
-              </Link>
-              <Link href="/backtest" className="text-sm font-medium hover:underline">
-                Backtest
-              </Link>
-              <Link href="/docs/api" className="text-sm font-medium hover:underline">
-                API
-              </Link>
-              <Link href="/currencies" className="text-sm font-medium hover:underline">
-                All currencies
-              </Link>
-            </div>
+          <nav className="relative mx-auto flex w-full max-w-5xl items-center gap-6 p-4">
+            <Link href="/" className="flex items-center gap-2 font-bold">
+              <Logo className="size-7" />
+              Exchange Rates
+            </Link>
             {/* The session is per visitor, so it streams in and the rest of the layout stays static */}
-            <Suspense fallback={null}>
-              <UserMenu />
-            </Suspense>
+            <SiteNav
+              account={
+                <Suspense fallback={null}>
+                  <UserMenu />
+                </Suspense>
+              }
+            />
           </nav>
         </header>
         {/* Pages stay mounted (hidden) between visits, so the slide runs on the content update, not on enter/exit */}
