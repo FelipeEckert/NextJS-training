@@ -78,8 +78,8 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
           </g>
         </svg>
         {/* The scale's ends, so the line reads as numbers; ChartHover gives exact values per day */}
-        <span aria-hidden="true" className="pointer-events-none absolute right-0 top-0 rounded bg-background/70 px-1 text-xs text-zinc-500 tabular-nums">{formatBRL(domain[1])}</span>
-        <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 rounded bg-background/70 px-1 text-xs text-zinc-500 tabular-nums">{formatBRL(domain[0])}</span>
+        <span aria-hidden="true" className="pointer-events-none absolute right-1 top-1 rounded-md border border-zinc-200 bg-background/90 px-1.5 py-0.5 text-xs text-zinc-600 tabular-nums shadow-sm dark:border-zinc-800 dark:text-zinc-400">{formatBRL(domain[1])}</span>
+        <span aria-hidden="true" className="pointer-events-none absolute bottom-1 right-1 rounded-md border border-zinc-200 bg-background/90 px-1.5 py-0.5 text-xs text-zinc-600 tabular-nums shadow-sm dark:border-zinc-800 dark:text-zinc-400">{formatBRL(domain[0])}</span>
         <ChartHover
           dates={points.map((p) => p.date)}
           series={series}
