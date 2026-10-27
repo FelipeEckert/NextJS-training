@@ -71,6 +71,9 @@ export const PAIRS: string[] = CATALOG.map((c) => c.pair);
 // The pairs shown on the home page and prerendered at build time
 export const FEATURED_PAIRS = ["USD-BRL", "EUR-BRL", "BTC-BRL", "GBP-BRL"];
 
+// The home page ticker tape. All pairs come from the same cached quote call, so this costs no extra request
+export const TICKER_PAIRS = ["USD-BRL", "EUR-BRL", "GBP-BRL", "BTC-BRL", "ETH-BRL", "JPY-BRL", "CHF-BRL", "CAD-BRL", "AUD-BRL", "ARS-BRL", "SOL-BRL", "XAU-BRL"];
+
 // Case-insensitive, so "usd-brl" from a URL still finds USD-BRL
 export function findCurrency(pair: string): Currency | undefined {
   return CATALOG.find((c) => c.pair === pair.toUpperCase());

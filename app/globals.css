@@ -209,3 +209,23 @@ body {
     animation-delay: calc(min(var(--i, 0), 10) * 40ms);
   }
 }
+
+/* Ticker tape: the track holds the list twice, so moving it by half loops seamlessly */
+@keyframes ticker {
+  to {
+    translate: -50% 0;
+  }
+}
+.ticker-viewport {
+  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticker-track {
+    animation: ticker 45s linear infinite;
+  }
+  .ticker[data-paused="true"] .ticker-track,
+  .ticker-viewport:hover .ticker-track,
+  .ticker:focus-within .ticker-track {
+    animation-play-state: paused;
+  }
+}
