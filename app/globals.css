@@ -223,20 +223,55 @@ body {
   }
 }
 
-/* Home hero glow: a slow drift, motion-safe only */
-@keyframes glow-drift {
-  to {
-    translate: 24px 16px;
+/* Home hero: graphite globe colours (light, then dark) */
+:root {
+  --globe-1: #475569; --globe-2: #94a3b8; --globe-3: #cbd5e1;
+  --globe-sphere-hi: #f8fafc; --globe-sphere-mid: rgb(241 245 249 / .85); --globe-sphere-lo: rgb(226 232 240 / .7);
+  --globe-grid: .22; --globe-land: .3; --globe-coast: .6; --globe-limb: .22; --globe-atmos: .2; --globe-rim: .75;
+  --globe-flow-out: #6366f1; --globe-flow-in: #f59e0b; --globe-hub: #22c55e; --globe-label: #334155;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --globe-sphere-hi: rgb(148 163 184 / .16); --globe-sphere-mid: rgb(30 41 59 / .3); --globe-sphere-lo: rgb(15 23 42 / .5);
+    --globe-grid: .16; --globe-land: .4; --globe-coast: .75; --globe-limb: .35; --globe-atmos: .3; --globe-rim: .9;
+    --globe-label: #e2e8f0;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .hero-glow > * {
-    animation: glow-drift 14s ease-in-out infinite alternate;
-  }
-  .hero-glow > :last-child {
-    animation-duration: 18s;
-    animation-direction: alternate-reverse;
-  }
+/* Fades the globe away from the headline, so the text keeps its contrast */
+.hero-globe {
+  opacity: .75;
+  mask-image: linear-gradient(125deg, transparent 0%, rgb(0 0 0 / .35) 28%, #000 55%, #000 80%, rgb(0 0 0 / .55) 100%);
+}
+.hero-wallet-ring {
+  background-image: linear-gradient(135deg, rgb(99 102 241 / .7), rgb(203 213 225 / .7) 45%, rgb(56 189 248 / .55));
+  box-shadow: 0 24px 60px -22px rgb(30 41 59 / .45), 0 0 0 6px rgb(99 102 241 / .05);
+}
+@media (prefers-color-scheme: dark) {
+  .hero-wallet-ring { background-image: linear-gradient(135deg, rgb(99 102 241 / .7), rgb(71 85 105 / .6) 45%, rgb(56 189 248 / .55)); }
+}
+/* A wide, smoky band of light sweeps the order card's border left to right, then rests */
+@property --sweep { syntax: '<percentage>'; inherits: false; initial-value: -60%; }
+@keyframes beam-sweep { 0% { --sweep: -60%; } 65% { --sweep: 160%; } 100% { --sweep: 160%; } }
+.beam {
+  background-image: linear-gradient(100deg, transparent calc(var(--sweep) - 40%), rgb(99 102 241 / .18) calc(var(--sweep) - 28%), rgb(99 102 241 / .5) calc(var(--sweep) - 15%), rgb(168 85 247 / .75) var(--sweep), rgb(56 189 248 / .5) calc(var(--sweep) + 15%), rgb(56 189 248 / .18) calc(var(--sweep) + 28%), transparent calc(var(--sweep) + 40%));
+  animation: beam-sweep 8.5s cubic-bezier(.45, 0, .25, 1) infinite;
+}
+.sheen {
+  background-image: linear-gradient(100deg, transparent calc(var(--sweep) - 34%), rgb(255 255 255 / .08) calc(var(--sweep) - 20%), rgb(255 255 255 / .22) var(--sweep), rgb(255 255 255 / .08) calc(var(--sweep) + 20%), transparent calc(var(--sweep) + 34%));
+  opacity: .6;
+  animation: beam-sweep 8.5s cubic-bezier(.45, 0, .25, 1) infinite;
+}
+@media (prefers-color-scheme: dark) { .sheen { opacity: .12; } }
+/* Light streaks travel the cash-flow arcs; "in" runs back toward São Paulo */
+@keyframes streak { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.streak { stroke-dasharray: 8 92; animation: streak 4.4s linear infinite; }
+.streak.in { animation-direction: reverse; }
+@keyframes live-dot { 50% { opacity: .35; } }
+.live { animation: live-dot 1.6s ease-in-out infinite; }
+.hero[data-paused="true"] :is(.beam, .sheen, .streak, .live) { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .beam, .sheen, .live { animation: none; }
+  .streak { display: none; }
 }
 
 /* Rows fade in one after another; the cap keeps long tables from waiting */
