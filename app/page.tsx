@@ -1,5 +1,6 @@
 import { io } from "next/cache";
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { QuoteCard } from "@/components/QuoteCard";
 import { RefreshButton } from "@/components/RefreshButton";
 import { getQuotes } from "@/lib/quotes";
@@ -17,22 +18,29 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-5xl p-8">
-      <h1 className="text-3xl font-bold">Exchange Rates</h1>
-      <p className="mt-2 text-zinc-500">Live rates in Brazilian reais, updated every minute.</p>
-      <Link href="/currencies" className="mt-2 inline-block text-sm font-medium hover:underline">
-        Browse all 52 currencies →
-      </Link>
+      {/* Inside main, not on it, so the padding and width stay put while the content slides */}
+      <ViewTransition
+        enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+        exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+        default="none"
+      >
+        <h1 className="text-3xl font-bold">Exchange Rates</h1>
+        <p className="mt-2 text-zinc-500">Live rates in Brazilian reais, updated every minute.</p>
+        <Link href="/currencies" className="mt-2 inline-block text-sm font-medium hover:underline">
+          Browse all 52 currencies →
+        </Link>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-zinc-500">Last fetched at {fetchedTime} (Brasília time)</p>
-        <RefreshButton />
-      </div>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-zinc-500">Last fetched at {fetchedTime} (Brasília time)</p>
+          <RefreshButton />
+        </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {quotes.map((q) => (
-          <QuoteCard key={q.pair} {...q} />
-        ))}
-      </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {quotes.map((q) => (
+            <QuoteCard key={q.pair} {...q} />
+          ))}
+        </div>
+      </ViewTransition>
     </main>
   );
 }

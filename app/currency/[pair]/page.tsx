@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, ViewTransition, type ReactNode } from "react";
 import { DeltaChip } from "@/components/DeltaChip";
 import { FavoriteStar } from "@/components/FavoriteStar";
 import { PriceChart } from "@/components/PriceChart";
@@ -21,13 +21,24 @@ export function generateStaticParams() {
 export default function CurrencyPage({ params, searchParams }: PageProps<"/currency/[pair]">) {
   return (
     <main className="mx-auto w-full max-w-3xl p-8">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← Back
-      </Link>
+      {/* Inside main, not on it, so the padding and width stay put while the content slides */}
+      <ViewTransition
+        enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+        exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+        default="none"
+      >
+        <Link
+          href="/"
+          transitionTypes={["nav-back"]}
+          className="text-sm text-zinc-500 hover:underline"
+        >
+          ← Back
+        </Link>
 
-      <Suspense fallback={<QuoteDetailsSkeleton />}>
-        <CurrencyDetails params={params} searchParams={searchParams} />
-      </Suspense>
+        <Suspense fallback={<QuoteDetailsSkeleton />}>
+          <CurrencyDetails params={params} searchParams={searchParams} />
+        </Suspense>
+      </ViewTransition>
     </main>
   );
 }
@@ -80,7 +91,10 @@ async function CurrencyDetails({
         <FavoriteStar pair={currency.pair} />
       </div>
 
-      <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
+      {/* Same name as the home card's price, so the number morphs between the two pages */}
+      <ViewTransition name={`price-${currency.pair}`} share="morph" default="none">
+        <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
+      </ViewTransition>
       <p className="mt-2 text-sm text-zinc-500">Latest price on {latestDay}</p>
 
       {/* Reads the session cookie, so it streams in on its own */}
@@ -89,7 +103,10 @@ async function CurrencyDetails({
       </Suspense>
 
       <RangeTabs pair={currency.pair} active={range} />
-      <PriceChart points={points} />
+      {/* Keyed by range so changing the range crossfades the chart instead of swapping it */}
+      <ViewTransition key={range} name="price-chart" share="auto" enter="auto" default="none">
+        <PriceChart points={points} />
+      </ViewTransition>
 
       <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Stat label="Change">

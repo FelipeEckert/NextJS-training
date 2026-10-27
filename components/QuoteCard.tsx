@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { AnimatedBRL } from "./AnimatedBRL";
 import { DeltaChip } from "./DeltaChip";
 import { FavoriteStar } from "./FavoriteStar";
@@ -21,15 +22,22 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
     <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
       <div className="flex items-center justify-between">
         {/* Only the name is a link: a button inside a link is invalid HTML */}
-        <Link href={`/currency/${pair}`} className="text-sm text-zinc-500 hover:underline">
+        <Link
+          href={`/currency/${pair}`}
+          transitionTypes={["nav-forward"]}
+          className="text-sm text-zinc-500 hover:underline"
+        >
           {currency}
         </Link>
         <FavoriteStar pair={pair} />
       </div>
 
-      <p className="mt-1 text-2xl font-semibold tabular-nums">
-        <AnimatedBRL value={price} />
-      </p>
+      {/* Same name as the big price on the currency page, so the number morphs between them */}
+      <ViewTransition name={`price-${pair}`} share="morph" default="none">
+        <p className="mt-1 text-2xl font-semibold tabular-nums">
+          <AnimatedBRL value={price} />
+        </p>
+      </ViewTransition>
 
       <p>
         <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>
