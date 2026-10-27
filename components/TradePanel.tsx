@@ -9,11 +9,24 @@ export async function TradePanel({ pair, code }: { pair: string; code: string })
   const user = await getCurrentUser();
   if (!user) {
     return (
-      <p className="mt-6">
-        <Link href={`/login?next=/currency/${pair}`} className="font-medium hover:underline">
-          Sign in to trade
-        </Link>
-      </p>
+      <div className="mt-6 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
+        <p className="font-medium">Trade {code} with virtual cash</p>
+        <p className="mt-1 text-sm text-zinc-500">Every account starts with R$ 100,000. Live prices, no real money.</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href={`/login?next=/currency/${pair}`}
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-500/20 hover:brightness-110"
+          >
+            Sign in to trade
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          >
+            Create account
+          </Link>
+        </div>
+      </div>
     );
   }
 

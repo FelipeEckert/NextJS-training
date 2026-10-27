@@ -2,6 +2,17 @@ import { useId } from "react";
 import { ChartHover } from "@/components/ChartHover";
 import type { PricePoint } from "@/lib/analysis";
 import { buildAreaPath, buildLinePath } from "@/lib/chart";
+import { formatBRL } from "@/lib/format";
+
+// "2026-10-27" -> "Oct 27, 2026"; noon UTC keeps the day from shifting
+function shortDate(date: string) {
+  return new Date(date + "T12:00:00Z").toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 // Fixed coordinates for the path; the viewBox stretches it to the card width
 const WIDTH = 640;
@@ -66,6 +77,9 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
             />
           </g>
         </svg>
+        {/* The scale's ends, so the line reads as numbers; ChartHover gives exact values per day */}
+        <span aria-hidden="true" className="pointer-events-none absolute right-0 top-0 rounded bg-background/70 px-1 text-xs text-zinc-500 tabular-nums">{formatBRL(domain[1])}</span>
+        <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 rounded bg-background/70 px-1 text-xs text-zinc-500 tabular-nums">{formatBRL(domain[0])}</span>
         <ChartHover
           dates={points.map((p) => p.date)}
           series={series}
@@ -75,8 +89,8 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
       </div>
 
       <div className="mt-2 flex justify-between text-xs text-zinc-500 tabular-nums">
-        <span>{first.date}</span>
-        <span>{last.date}</span>
+        <span>{shortDate(first.date)}</span>
+        <span>{shortDate(last.date)}</span>
       </div>
 
       {compare && (

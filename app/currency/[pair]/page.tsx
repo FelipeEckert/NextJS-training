@@ -10,6 +10,7 @@ import { parseRange, sliceRange, summarize } from "@/lib/analysis";
 import { formatBRL } from "@/lib/format";
 import { FEATURED_PAIRS, findCurrency } from "@/lib/currencies";
 import { getHistory } from "@/lib/history";
+import { getQuote } from "@/lib/quotes";
 
 // Tells Next which pairs exist, so it prerenders these pages at build time
 export function generateStaticParams() {
@@ -47,7 +48,10 @@ async function CurrencyDetails({
   if (!currency) notFound();
 
   // Always pass currency.pair, never the raw URL value: getHistory only accepts exact catalog pairs
-  const history = await getHistory(currency.pair);
+  const [history, quote] = await Promise.all([
+    getHistory(currency.pair),
+    getQuote(currency.pair).catch(() => undefined), // the chip is optional; the page never fails over it
+  ]);
 
   if (history.length === 0) {
     return (
@@ -72,6 +76,8 @@ async function CurrencyDetails({
   const percent = Number(summary.changePct.toFixed(2));
   // Show "+" only for a real gain, so a flat period reads as zero
   const sign = percent > 0 ? "+" : "";
+  // The 24h chip reads the live quote; it is optional, so the page renders without it
+  const day = quote ? Number(quote.change.toFixed(2)) : 0;
 
   return (
     <>
@@ -80,7 +86,15 @@ async function CurrencyDetails({
         <FavoriteStar pair={currency.pair} />
       </div>
 
-      <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <p className="text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
+        {quote && (
+          <span className="flex items-center gap-1.5">
+            <DeltaChip value={day}>{`${day > 0 ? "+" : ""}${day.toFixed(2)}%`}</DeltaChip>
+            <span className="text-sm text-zinc-500">24h</span>
+          </span>
+        )}
+      </div>
       <p className="mt-2 text-sm text-zinc-500">Latest price on {latestDay}</p>
 
       {/* Reads the session cookie, so it streams in on its own */}
@@ -95,7 +109,7 @@ async function CurrencyDetails({
       </ViewTransition>
 
       <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <Stat label="Change">
+        <Stat label="Change" className="col-span-2">
           <DeltaChip value={percent}>
             {`${sign}${formatBRL(summary.change)} (${sign}${summary.changePct.toFixed(2)}%)`}
           </DeltaChip>
@@ -109,9 +123,9 @@ async function CurrencyDetails({
   );
 }
 
-function Stat({ label, children }: { label: string; children: ReactNode }) {
+function Stat({ label, className, children }: { label: string; className?: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className={`rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 ${className ?? ""}`}>
       <dt className="text-sm text-zinc-500">{label}</dt>
       <dd className="mt-1 text-lg font-semibold tabular-nums">{children}</dd>
     </div>
