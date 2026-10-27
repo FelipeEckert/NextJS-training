@@ -1,5 +1,6 @@
+import { useId } from "react";
 import type { PricePoint } from "@/lib/analysis";
-import { buildLinePath } from "@/lib/chart";
+import { buildAreaPath, buildLinePath } from "@/lib/chart";
 
 // Fixed coordinates for the path; the viewBox stretches it to the card width
 const WIDTH = 640;
@@ -16,6 +17,8 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
     ? [Math.min(...values), Math.max(...values)]
     : undefined;
   const color = isUp ? "text-green-600" : "text-red-600";
+  // Server components have useId too, and its id is unique per request, so two charts on one page never clash
+  const gradientId = useId();
 
   return (
     <div className="mt-6">
@@ -26,25 +29,37 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
         role="img"
         aria-label={`Price chart from ${first.date} to ${last.date}`}
       >
-        {compare && (
+        <g className="chart-reveal">
+          {/* The stops carry the colour class: currentColor resolves on the stop, not on the filled path */}
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity={0.25} className={color} />
+            <stop offset="100%" stopColor="currentColor" stopOpacity={0} className={color} />
+          </linearGradient>
           <path
-            d={buildLinePath(compare.map((p) => p.close), WIDTH, HEIGHT, domain)}
+            d={buildAreaPath(closes, WIDTH, HEIGHT, domain)}
+            fill={`url(#${gradientId})`}
+            stroke="none"
+          />
+          {compare && (
+            <path
+              d={buildLinePath(compare.map((p) => p.close), WIDTH, HEIGHT, domain)}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              vectorEffect="non-scaling-stroke"
+              className="text-zinc-400"
+            />
+          )}
+          <path
+            d={buildLinePath(closes, WIDTH, HEIGHT, domain)}
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
-            strokeDasharray="4 4"
             vectorEffect="non-scaling-stroke"
-            className="text-zinc-400"
+            className={color}
           />
-        )}
-        <path
-          d={buildLinePath(closes, WIDTH, HEIGHT, domain)}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          vectorEffect="non-scaling-stroke"
-          className={color}
-        />
+        </g>
       </svg>
 
       <div className="mt-2 flex justify-between text-xs text-zinc-500 tabular-nums">

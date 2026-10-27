@@ -51,3 +51,19 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Charts draw in from the left once; clip-path works with the non-scaling strokes the charts use */
+@keyframes chart-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chart-reveal {
+    animation: chart-reveal 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
