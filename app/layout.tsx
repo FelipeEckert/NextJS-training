@@ -5,7 +5,10 @@ import { Suspense, ViewTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { SiteNav } from "@/components/SiteNav";
 import { UserMenu } from "@/components/UserMenu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
+
+const THEME_SCRIPT = `(function(){var d=document.documentElement,t;try{t=localStorage.getItem("theme")}catch(e){}d.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"})()`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +30,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Runs before first paint, so a saved theme never flashes. shortcut: visitors without JS always get light */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {/* Named so the header stays still during page slides */}
         <header
@@ -47,6 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </Suspense>
               }
             />
+            <ThemeToggle />
           </nav>
         </header>
         {/* Pages stay mounted (hidden) between visits, so the slide runs on the content update, not on enter/exit */}
