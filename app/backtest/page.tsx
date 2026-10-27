@@ -285,9 +285,15 @@ function NumberField({
   value: string;
 }) {
   return (
-    <label className="grid gap-1 text-sm font-medium">
+    <label className="grid min-w-0 gap-1 text-sm font-medium">
       {label}
-      <input type="number" name={name} step={step} defaultValue={value} className={inputClass} />
+      <input
+        type="number"
+        name={name}
+        step={step}
+        defaultValue={value}
+        className={`${inputClass} w-full min-w-0`}
+      />
     </label>
   );
 }
