@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { AuthShell } from "@/components/AuthShell";
 import { SignupForm } from "@/components/SignupForm";
 
 export const metadata: Metadata = { title: "Create an account" };
 
 export default function SignupPage() {
   return (
-    <main className="mx-auto w-full max-w-sm p-8">
-      <h1 className="text-2xl font-bold">Create an account</h1>
-
+    <AuthShell title="Create an account" subtitle="Start with R$ 100,000 of virtual cash. No card needed.">
       {/* The form reads ?next= from the URL, which is request data, so it streams in */}
       <Suspense fallback={null}>
         <SignupForm />
@@ -21,6 +20,6 @@ export default function SignupPage() {
           Sign in
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }
