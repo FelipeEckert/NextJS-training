@@ -8,6 +8,8 @@ A paper-trading app built with Next.js 16 and Postgres. Every account starts wit
 
 On the login page, click **Try the demo** to enter a shared demo account with one click. Anyone can reset that wallet, so the demo account is left off the leaderboard and cannot create API keys. To get your own wallet and API key, create an account at `/signup`.
 
+![Demo: the live ticker on the home page, a slide to the USD page, the chart crosshair, a R$ 100 buy, the wallet reveal and the leaderboard with your row highlighted](docs/demo.gif)
+
 ## Features
 
 ### Accounts and wallet
@@ -121,6 +123,12 @@ Next.js 16 (App Router, Cache Components, Server Actions, Route Handlers), React
 - **Quote freshness.** A trade needs a quote that the server fetched within the last 2 minutes. A quote with a missing, zero or non-numeric bid or ask is untradable. See `lib/trade-quote.ts` and `lib/quotes.ts`.
 - **Rate limits.** A fixed one-minute window counted in a Postgres table. It covers API requests (60 per key per minute, in `withApiKey`) and sign-ups (5 per IP per hour). See `lib/rate-limit.ts`, `lib/api.ts` and `app/auth-actions.ts`.
 - **Auth.** Passwords are hashed with `scrypt` and compared with `timingSafeEqual`. An unknown username costs the same scrypt run as a wrong password, so timing does not reveal which usernames exist. The session cookie is an HMAC-SHA256 signed token, set `HttpOnly` with `SameSite=Lax`. See `lib/password.ts`, `lib/session-token.ts`, `lib/session.ts`, and the lockout in `lib/users.ts`.
+- **Motion without a library.**
+  - Page slides and the wallet's skeleton-to-content handoff use React's `<ViewTransition>`.
+  - The ticker, row stagger, chart draw-in and scroll reveal are plain CSS.
+  - Only small client islands hold state: the pause button, the chart crosshair, the copy buttons and the price roll (NumberFlow). Pages and cards stay Server Components.
+  - Everything respects `prefers-reduced-motion`, and the ticker has a visible pause button (WCAG 2.2.2).
+  - The whole polish round added at most 6.5 KB gzip of client JS to a route. Lighthouse scores before and after are in [docs/perf-baseline.md](docs/perf-baseline.md).
 - **API keys.** A key is `ptk_` plus 32 random bytes. The database stores only its SHA-256 hash and a short prefix for display. The demo account cannot create keys. See `lib/api-keys.ts`.
 
 ## API quick start
