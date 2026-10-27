@@ -65,19 +65,19 @@ export function SiteNav({ account }: { account: ReactNode }) {
 
   return (
     <>
-      {/* md and up: links on the left, account on the right */}
-      <div className="hidden flex-1 items-center justify-between gap-4 md:flex">
+      {/* lg and up: links on the left, account on the right */}
+      <div className="hidden flex-1 items-center justify-between gap-4 lg:flex">
         <NavList pathname={pathname} onNavigate={close} className="flex items-center gap-1" />
         {account}
       </div>
 
-      {/* Phones: one button, so the links don't wrap into several rows */}
+      {/* Phones and tablets: one button, so the links do not wrap into several rows */}
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="mobile-nav"
-        className="ml-auto flex items-center gap-2 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm font-medium md:hidden dark:border-zinc-700"
+        className="ml-auto flex items-center gap-2 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm font-medium lg:hidden dark:border-zinc-700"
       >
         <svg
           aria-hidden="true"
@@ -95,7 +95,7 @@ export function SiteNav({ account }: { account: ReactNode }) {
       {open && (
         <div
           id="mobile-nav"
-          className="absolute inset-x-0 top-full border-b border-zinc-200 bg-background p-4 shadow-lg md:hidden dark:border-zinc-800"
+          className="absolute inset-x-0 top-full border-b border-zinc-200 bg-background p-4 shadow-lg lg:hidden dark:border-zinc-800"
         >
           <NavList pathname={pathname} onNavigate={close} className="grid gap-1" block />
           <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">{account}</div>

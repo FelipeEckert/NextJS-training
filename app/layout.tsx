@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           className="sticky top-0 z-20 border-b border-zinc-200 bg-background/80 backdrop-blur dark:border-zinc-800"
         >
           <nav className="relative mx-auto flex w-full max-w-5xl items-center gap-6 p-4">
-            <Link href="/" className="flex items-center gap-2 font-bold">
+            <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap font-bold">
               <Logo className="size-7" />
               Exchange Rates
             </Link>
