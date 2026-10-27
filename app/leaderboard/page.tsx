@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { DeltaChip } from "@/components/DeltaChip";
 import { formatBRL } from "@/lib/format";
 import { rankWallets } from "@/lib/leaderboard";
@@ -65,7 +65,11 @@ async function LeaderboardTable() {
             // Round first, so a tiny negative return shows as flat instead of "-0.00%"
             const shown = Number(row.returnPct.toFixed(2));
             return (
-              <tr key={row.username} className="border-t border-zinc-200 dark:border-zinc-800">
+              <tr
+                key={row.username}
+                className="stagger-row border-t border-zinc-200 dark:border-zinc-800"
+                style={{ "--i": index } as CSSProperties}
+              >
                 <td className="py-2 pr-4">{index + 1}</td>
                 <td className="py-2 pr-4 font-medium">
                   {row.username}
