@@ -15,7 +15,7 @@ export function RangeTabs({ pair, active }: { pair: string; active: Range }) {
             aria-current={isActive ? "page" : undefined}
             className={`rounded-full px-3 py-1 text-sm ${
               isActive
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                ? "bg-brand text-white"
                 : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >

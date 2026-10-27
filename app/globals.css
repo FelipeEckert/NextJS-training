@@ -5,6 +5,8 @@
   --foreground: #171717;
   --accent: var(--color-indigo-600);
   --accent-hover: var(--color-indigo-700);
+  --brand-text-from: var(--color-indigo-600);
+  --brand-text-to: var(--color-violet-600);
   --gain: var(--color-green-800);
   --loss: var(--color-red-700);
 }
@@ -23,11 +25,23 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Brand gradient. Buttons keep the 600 steps in both themes, so white text passes contrast */
+@utility bg-brand {
+  background-image: linear-gradient(135deg, var(--color-indigo-600), var(--color-violet-600));
+}
+@utility text-brand {
+  background-image: linear-gradient(135deg, var(--brand-text-from), var(--brand-text-to));
+  background-clip: text;
+  color: transparent;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
     --accent-hover: var(--color-indigo-500);
+    --brand-text-from: var(--color-indigo-400);
+    --brand-text-to: var(--color-violet-400);
     --gain: var(--color-green-400);
     --loss: var(--color-red-400);
   }

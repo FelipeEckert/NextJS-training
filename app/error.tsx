@@ -10,7 +10,7 @@ export default function ErrorPage({ retry }: { error: unknown; retry: () => void
       <button
         type="button"
         onClick={() => retry()}
-        className="mt-4 rounded-lg bg-accent px-4 py-2 text-white hover:bg-accent-hover"
+        className="mt-4 rounded-lg bg-brand shadow-md shadow-indigo-500/20 px-4 py-2 text-white hover:brightness-110"
       >
         Try again
       </button>
