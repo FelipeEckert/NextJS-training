@@ -42,7 +42,11 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
 
   return (
     <>
-      <form method="get" action="/backtest" className="mt-6 grid gap-4">
+      <form
+        method="get"
+        action="/backtest"
+        className="backtest-form mt-6 grid gap-5 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-6 dark:border-zinc-800 dark:bg-zinc-900/40"
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-medium">
             Currency
@@ -67,8 +71,11 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
           </label>
         </div>
 
-        <fieldset className="grid gap-4 sm:grid-cols-3">
-          <legend className="text-sm font-semibold">Buy the dip</legend>
+        <fieldset
+          data-strategy="dip"
+          className="grid gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 sm:grid-cols-3"
+        >
+          <legend className="px-1 text-sm font-semibold">Buy the dip</legend>
           <NumberField label="Drop (%)" name="dropPct" step="0.1" value={field("dropPct")} />
           <NumberField
             label="Lookback (days)"
@@ -84,8 +91,11 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
           />
         </fieldset>
 
-        <fieldset className="grid gap-4 sm:grid-cols-2">
-          <legend className="text-sm font-semibold">Moving-average crossover</legend>
+        <fieldset
+          data-strategy="ma"
+          className="grid gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 sm:grid-cols-2"
+        >
+          <legend className="px-1 text-sm font-semibold">Moving-average crossover</legend>
           <NumberField
             label="Short average (days)"
             name="shortDays"
@@ -100,12 +110,15 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
           />
         </fieldset>
 
-        <button
-          type="submit"
-          className="justify-self-start rounded-lg bg-brand shadow-md shadow-indigo-500/20 px-4 py-2 font-medium text-white hover:brightness-110"
-        >
-          Run backtest
-        </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+          <p className="text-sm text-zinc-500">Runs on the last year of daily closes.</p>
+          <button
+            type="submit"
+            className="rounded-lg bg-brand shadow-md shadow-indigo-500/20 px-4 py-2 font-medium text-white hover:brightness-110"
+          >
+            Run backtest
+          </button>
+        </div>
       </form>
 
       {parsed.ok ? (
@@ -280,4 +293,4 @@ function NumberField({
 }
 
 const inputClass =
-  "rounded-lg border border-zinc-300 px-3 py-2 font-normal tabular-nums dark:border-zinc-700 dark:bg-zinc-900";
+  "rounded-lg border border-zinc-300 px-3 py-2 font-normal tabular-nums bg-background dark:border-zinc-700 dark:bg-zinc-900";
