@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { EmptyState } from "@/components/EmptyState";
 import { QuoteCard } from "@/components/QuoteCard";
 import { getFavorites } from "@/lib/favorites";
 import { getQuotes } from "@/lib/quotes";
@@ -32,9 +33,9 @@ async function FavoritesList() {
 
   if (favoriteQuotes.length === 0) {
     return (
-      <p className="mt-6 text-zinc-500">
-        No favorites yet. Tap the ☆ on any currency to add it here.
-      </p>
+      <EmptyState title="No favorites yet." action={{ href: "/currencies", label: "Browse currencies" }}>
+        Tap the ☆ on any currency to add it here.
+      </EmptyState>
     );
   }
 

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense, ViewTransition, type CSSProperties, type ReactNode } from "react";
 import { DeltaChip } from "@/components/DeltaChip";
+import { EmptyState } from "@/components/EmptyState";
 import { PriceChart } from "@/components/PriceChart";
 import { ResetWalletButton } from "@/components/ResetWalletButton";
 import type { PricePoint } from "@/lib/analysis";
@@ -167,7 +168,9 @@ async function WalletDetails() {
 
       <h2 className="mt-10 text-xl font-semibold">Positions</h2>
       {rows.length === 0 ? (
-        <p className="mt-4 text-zinc-500">No positions yet.</p>
+        <EmptyState title="No positions yet." action={{ href: "/currencies", label: "Browse currencies" }}>
+          Pick a currency and buy it with your virtual cash.
+        </EmptyState>
       ) : (
         <>
           <div className="mt-4 hidden overflow-x-auto sm:block">
@@ -246,7 +249,7 @@ async function WalletDetails() {
 
       <h2 className="mt-10 text-xl font-semibold">Trade history</h2>
       {trades.length === 0 ? (
-        <p className="mt-4 text-zinc-500">No trades yet.</p>
+        <EmptyState title="No trades yet.">Every buy and sell shows up here.</EmptyState>
       ) : (
         <>
           <div className="mt-4 hidden overflow-x-auto sm:block">

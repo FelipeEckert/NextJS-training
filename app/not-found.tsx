@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FEATURED_PAIRS, findCurrency } from "@/lib/currencies";
 
-export const metadata: Metadata = { title: "Page not found · Exchange Rates" };
+export const metadata: Metadata = { title: "Page not found" };
 
 export default function NotFound() {
   return (

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, ViewTransition, type ReactNode } from "react";
@@ -11,6 +12,11 @@ import { formatBRL } from "@/lib/format";
 import { FEATURED_PAIRS, findCurrency } from "@/lib/currencies";
 import { getHistory } from "@/lib/history";
 import { getQuote } from "@/lib/quotes";
+
+export async function generateMetadata({ params }: PageProps<"/currency/[pair]">): Promise<Metadata> {
+  const currency = findCurrency((await params).pair);
+  return currency ? { title: `${currency.label} to BRL` } : {};
+}
 
 // Tells Next which pairs exist, so it prerenders these pages at build time
 export function generateStaticParams() {
