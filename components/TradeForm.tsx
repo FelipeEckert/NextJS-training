@@ -66,7 +66,7 @@ export function TradeForm({
         {/* The pill sits behind the buttons and slides to the right half for Sell */}
         <span
           aria-hidden="true"
-          className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-md bg-accent transition-transform duration-200 ease-out ${
+          className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-md bg-brand transition-transform duration-200 ease-out ${
             side === "sell" ? "translate-x-full" : ""
           }`}
         />
@@ -148,7 +148,7 @@ export function TradeForm({
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-white transition-transform motion-safe:active:scale-[0.97] enabled:hover:bg-accent-hover disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand shadow-md shadow-indigo-500/20 px-4 py-2 font-medium text-white transition-transform motion-safe:active:scale-[0.97] enabled:hover:brightness-110 disabled:opacity-50"
       >
         {isPending && (
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 motion-safe:animate-spin" fill="none">

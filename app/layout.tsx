@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
+import { Logo } from "@/components/Logo";
 import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
 
@@ -34,8 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           <nav className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 p-4">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link href="/" className="font-bold">
-                💱 Exchange Rates
+              <Link href="/" className="flex items-center gap-2 font-bold">
+                <Logo className="size-7" />
+                Exchange Rates
               </Link>
               <Link href="/favorites" className="text-sm font-medium hover:underline">
                 Favorites
