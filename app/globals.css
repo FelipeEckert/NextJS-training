@@ -191,11 +191,11 @@ body {
   }
 }
 
-/* Docs sections fade up as they scroll in. Browsers without scroll timelines just show them */
+/* Docs sections rise into place as they scroll in. Browsers without scroll timelines just show them.
+   Movement only, no fade: text stays at full contrast at every point of the scroll */
 @keyframes reveal {
   from {
-    opacity: 0;
-    translate: 0 16px;
+    translate: 0 24px;
   }
 }
 
