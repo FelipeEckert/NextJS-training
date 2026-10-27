@@ -223,6 +223,22 @@ body {
   }
 }
 
+/* Home hero glow: a slow drift, motion-safe only */
+@keyframes glow-drift {
+  to {
+    translate: 24px 16px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-glow > * {
+    animation: glow-drift 14s ease-in-out infinite alternate;
+  }
+  .hero-glow > :last-child {
+    animation-duration: 18s;
+    animation-direction: alternate-reverse;
+  }
+}
+
 /* Rows fade in one after another; the cap keeps long tables from waiting */
 @keyframes row-in {
   from {
