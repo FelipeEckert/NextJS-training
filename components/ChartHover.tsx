@@ -55,8 +55,14 @@ export function ChartHover({
         tabIndex={0}
         onPointerMove={locate}
         onPointerDown={locate}
-        onPointerLeave={() => setIndex(null)}
-        onFocus={() => setIndex((prev) => prev ?? last)}
+        // A lifted finger counts as "leave", so on touch the tooltip stays until the chart loses focus
+        onPointerLeave={(event) => {
+          if (event.pointerType !== "touch") setIndex(null);
+        }}
+        // Only keyboard focus jumps to the last day; a tap focuses after the finger lifts and must keep its point
+        onFocus={(event) => {
+          if (event.currentTarget.matches(":focus-visible")) setIndex((prev) => prev ?? last);
+        }}
         onBlur={() => setIndex(null)}
         onKeyDown={onKeyDown}
         style={{ touchAction: "pan-y" }}
