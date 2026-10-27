@@ -21,24 +21,13 @@ export function generateStaticParams() {
 export default function CurrencyPage({ params, searchParams }: PageProps<"/currency/[pair]">) {
   return (
     <main className="mx-auto w-full max-w-3xl p-8">
-      {/* Inside main, not on it, so the padding and width stay put while the content slides */}
-      <ViewTransition
-        enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
-        exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
-        default="none"
-      >
-        <Link
-          href="/"
-          transitionTypes={["nav-back"]}
-          className="text-sm text-zinc-500 hover:underline"
-        >
-          ← Back
-        </Link>
+      <Link href="/" transitionTypes={["nav-back"]} className="text-sm text-zinc-500 hover:underline">
+        ← Back
+      </Link>
 
-        <Suspense fallback={<QuoteDetailsSkeleton />}>
-          <CurrencyDetails params={params} searchParams={searchParams} />
-        </Suspense>
-      </ViewTransition>
+      <Suspense fallback={<QuoteDetailsSkeleton />}>
+        <CurrencyDetails params={params} searchParams={searchParams} />
+      </Suspense>
     </main>
   );
 }
@@ -91,10 +80,7 @@ async function CurrencyDetails({
         <FavoriteStar pair={currency.pair} />
       </div>
 
-      {/* Same name as the home card's price, so the number morphs between the two pages */}
-      <ViewTransition name={`price-${currency.pair}`} share="morph" default="none">
-        <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
-      </ViewTransition>
+      <p className="mt-4 text-5xl font-semibold tabular-nums">{formatBRL(latest.close)}</p>
       <p className="mt-2 text-sm text-zinc-500">Latest price on {latestDay}</p>
 
       {/* Reads the session cookie, so it streams in on its own */}

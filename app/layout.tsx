@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
 
@@ -62,7 +62,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
           </nav>
         </header>
-        {children}
+        {/* Pages stay mounted (hidden) between visits, so the slide runs on the content update, not on enter/exit */}
+        <ViewTransition
+          update={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+          default="none"
+        >
+          {children}
+        </ViewTransition>
       </body>
     </html>
   );
