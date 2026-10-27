@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
+import { DeltaChip } from "@/components/DeltaChip";
 import { EquityChart } from "@/components/EquityChart";
 import { PriceChart } from "@/components/PriceChart";
 import { type PricePoint, sliceRange } from "@/lib/analysis";
@@ -101,7 +102,7 @@ async function BacktestPanel({ searchParams }: Pick<PageProps<"/backtest">, "sea
 
         <button
           type="submit"
-          className="justify-self-start rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          className="justify-self-start rounded-lg bg-accent px-4 py-2 font-medium text-white hover:bg-accent-hover"
         >
           Run backtest
         </button>
@@ -205,7 +206,7 @@ async function CompareResults({ pair, strategies }: { pair: string; strategies: 
                   <th scope="row" className="py-2 text-left font-medium">{STRATEGY_LABELS[s.kind]}</th>
                   <td className="py-2">{formatBRL(result.finalValue)}</td>
                   <td className="py-2">
-                    <span className={ret.color}>{ret.text}</span>
+                    <DeltaChip value={ret.value}>{ret.text}</DeltaChip>
                   </td>
                   <td className="py-2">{result.trades}</td>
                   <td className="py-2">{`${result.maxDrawdownPct.toFixed(2)}%`}</td>
@@ -229,8 +230,7 @@ async function CompareResults({ pair, strategies }: { pair: string; strategies: 
 function formatReturn(returnPct: number) {
   const rounded = Number(returnPct.toFixed(2));
   const sign = rounded > 0 ? "+" : "";
-  const color = rounded > 0 ? "text-green-600" : rounded < 0 ? "text-red-600" : "";
-  return { text: `${sign}${rounded.toFixed(2)}%`, color };
+  return { text: `${sign}${rounded.toFixed(2)}%`, value: rounded };
 }
 
 function ResultRow({ label, result }: { label: string; result: BacktestResult }) {
@@ -242,7 +242,7 @@ function ResultRow({ label, result }: { label: string; result: BacktestResult })
       <dl className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Final value">{formatBRL(result.finalValue)}</Stat>
         <Stat label="Return">
-          <span className={ret.color}>{ret.text}</span>
+          <DeltaChip value={ret.value}>{ret.text}</DeltaChip>
         </Stat>
         <Stat label="Trades">{result.trades}</Stat>
         <Stat label="Max drawdown">{`${result.maxDrawdownPct.toFixed(2)}%`}</Stat>

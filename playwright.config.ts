@@ -16,6 +16,7 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
+    reducedMotion: "reduce", // deterministic runs, and CI exercises the reduced-motion path
   },
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: process.env.E2E_BASE_URL

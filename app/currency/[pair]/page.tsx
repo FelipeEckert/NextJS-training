@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
+import { DeltaChip } from "@/components/DeltaChip";
 import { FavoriteStar } from "@/components/FavoriteStar";
 import { PriceChart } from "@/components/PriceChart";
 import { RangeTabs } from "@/components/RangeTabs";
@@ -67,9 +68,10 @@ async function CurrencyDetails({
     month: "short",
     day: "numeric",
   });
-  const isUp = summary.change >= 0;
+  // Direction comes from the rounded percent, so the R$ change and the percent always agree
+  const percent = Number(summary.changePct.toFixed(2));
   // Show "+" only for a real gain, so a flat period reads as zero
-  const sign = summary.change > 0 ? "+" : "";
+  const sign = percent > 0 ? "+" : "";
 
   return (
     <>
@@ -91,9 +93,9 @@ async function CurrencyDetails({
 
       <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Stat label="Change">
-          <span className={isUp ? "text-green-600" : "text-red-600"}>
+          <DeltaChip value={percent}>
             {`${sign}${formatBRL(summary.change)} (${sign}${summary.changePct.toFixed(2)}%)`}
-          </span>
+          </DeltaChip>
         </Stat>
         <Stat label="Low">{formatBRL(summary.min)}</Stat>
         <Stat label="High">{formatBRL(summary.max)}</Stat>
