@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { UserMenu } from "@/components/UserMenu";
 import "./globals.css";
 
@@ -27,7 +27,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="sticky top-0 z-20 border-b border-zinc-200 bg-background/80 backdrop-blur dark:border-zinc-800">
+        {/* Named so the header stays still during page slides */}
+        <header
+          style={{ viewTransitionName: "site-header" }}
+          className="sticky top-0 z-20 border-b border-zinc-200 bg-background/80 backdrop-blur dark:border-zinc-800"
+        >
           <nav className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 p-4">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <Link href="/" className="font-bold">
@@ -58,7 +62,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
           </nav>
         </header>
-        {children}
+        {/* Pages stay mounted (hidden) between visits, so the slide runs on the content update, not on enter/exit */}
+        <ViewTransition
+          update={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+          default="none"
+        >
+          {children}
+        </ViewTransition>
       </body>
     </html>
   );

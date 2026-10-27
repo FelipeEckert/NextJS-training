@@ -21,7 +21,11 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
     <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
       <div className="flex items-center justify-between">
         {/* Only the name is a link: a button inside a link is invalid HTML */}
-        <Link href={`/currency/${pair}`} className="text-sm text-zinc-500 hover:underline">
+        <Link
+          href={`/currency/${pair}`}
+          transitionTypes={["nav-forward"]}
+          className="text-sm text-zinc-500 hover:underline"
+        >
           {currency}
         </Link>
         <FavoriteStar pair={pair} />

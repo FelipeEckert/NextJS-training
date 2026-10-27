@@ -55,6 +55,74 @@ body {
   }
 }
 
+/* View transitions: the header stays put while pages slide between home and a currency */
+::view-transition {
+  pointer-events: none;
+}
+
+/* The header is outside the slide, so it is kept still on top of the moving content */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* 40px travel: the pages are smaller than the guide's, so less movement is enough */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -40px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 40px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 40px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -40px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
 /* Charts draw in from the left once; clip-path works with the non-scaling strokes the charts use */
 @keyframes chart-reveal {
   from {
