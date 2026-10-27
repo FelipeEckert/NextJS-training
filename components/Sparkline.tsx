@@ -25,7 +25,8 @@ export async function Sparkline({ pair }: { pair: string }) {
   // Decorative: the card's text already carries the price and change
   return (
     <div className="mt-3 flex items-end gap-2" aria-hidden="true">
-      <svg viewBox="0 0 200 40" preserveAspectRatio="none" className={`h-10 flex-1 ${color}`}>
+      {/* 2px of padding, so the line's peaks aren't clipped at the edges */}
+      <svg viewBox="0 -2 200 44" preserveAspectRatio="none" className={`h-10 flex-1 ${color}`}>
         <g className="chart-reveal">
           <path
             d={buildLinePath(closes, 200, 40)}
