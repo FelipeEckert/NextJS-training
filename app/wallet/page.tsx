@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { DeltaChip } from "@/components/DeltaChip";
 import { PriceChart } from "@/components/PriceChart";
 import { ResetWalletButton } from "@/components/ResetWalletButton";
 import type { PricePoint } from "@/lib/analysis";
@@ -104,7 +105,7 @@ async function WalletDetails() {
           {returnPct === null ? (
             "Price unavailable"
           ) : (
-            <span className={gainClass(Number(returnPct.toFixed(2)))}>{percent(returnPct)}</span>
+            <DeltaChip value={Number(returnPct.toFixed(2))}>{percent(returnPct)}</DeltaChip>
           )}
         </Card>
         <Card label="Cash">{formatBRL(wallet.cashCents / 100)}</Card>
@@ -157,10 +158,10 @@ async function WalletDetails() {
                       {row.plCents === null ? (
                         "—"
                       ) : (
-                        <span className={gainClass(row.plCents)}>
+                        <DeltaChip value={row.plCents}>
                           {`${plus(row.plCents)}${formatBRL(row.plCents / 100)}`}
                           {row.plPct !== null && ` (${percent(row.plPct)})`}
-                        </span>
+                        </DeltaChip>
                       )}
                     </td>
                   </tr>
@@ -236,10 +237,4 @@ function plus(value: number) {
 function percent(value: number) {
   const shown = Number(value.toFixed(2));
   return `${plus(shown)}${shown.toFixed(2)}%`;
-}
-
-function gainClass(value: number) {
-  if (value > 0) return "text-green-600";
-  if (value < 0) return "text-red-600";
-  return "";
 }

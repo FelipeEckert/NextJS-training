@@ -62,7 +62,7 @@ export function TradeForm({
             }}
             className={`rounded-lg px-4 py-2 font-medium ${
               side === option
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                ? "bg-accent text-white"
                 : "border border-zinc-300 dark:border-zinc-700"
             }`}
           >
@@ -109,7 +109,7 @@ export function TradeForm({
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+        className="rounded-lg bg-accent px-4 py-2 font-medium text-white hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "Placing order…" : side === "buy" ? "Buy" : "Sell"}
       </button>
