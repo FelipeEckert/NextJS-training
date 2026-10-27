@@ -37,7 +37,7 @@ export function CurrencySearch({ currencies }: { currencies: Currency[] }) {
             <li key={c.pair}>
               <Link
                 href={`/currency/${c.pair}`}
-                className="block rounded-xl border border-zinc-200 p-5 hover:underline dark:border-zinc-800"
+                className="block rounded-xl border border-zinc-200 p-5 transition duration-200 hover:border-indigo-300/70 hover:shadow-lg hover:shadow-indigo-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 motion-safe:hover:-translate-y-0.5 dark:border-zinc-800 dark:hover:border-indigo-500/40"
               >
                 {c.label}
               </Link>
