@@ -28,3 +28,49 @@ Date: 2026-10-26. Same toolchain for both rows. Each row sums the JS chunks list
 | delta | +18,008 | +5,762 |
 
 The NumberFlow path is in use (its server HTML carries the price as text and as an `aria-label`). Gate: at most about 15 KB gzip more on `/`, so +5.8 KB passes.
+
+## After: the whole visual-polish round
+
+Date: 2026-10-27. Same toolchain. The **before** column is `e4ddd28`, the commit just before this round started (#37); the **after** column is `9e49e96`, the merge of #57. Both use the method from the section above: sum the first-load chunks in `.next/diagnostics/route-bundle-stats.json` and gzip each chunk at level 9.
+
+### Client JavaScript per route
+
+| Route | Before (bytes) | After (bytes) | Before, gzip | After, gzip | Delta, gzip |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `/` | 468,896 | 487,876 | 140,053 | 146,567 | +6,514 |
+| `/currency/[pair]` | 470,595 | 474,426 | 140,722 | 142,593 | +1,871 |
+| `/wallet` | 468,652 | 471,452 | 139,919 | 141,518 | +1,599 |
+| `/leaderboard` | 467,178 | 467,299 | 139,174 | 139,672 | +498 |
+| `/backtest` | 467,178 | 470,115 | 139,174 | 141,043 | +1,869 |
+| `/docs/api` | 467,178 | 468,260 | 139,174 | 140,231 | +1,057 |
+
+What it bought:
+- view transitions between pages and on the wallet's loading reveal;
+- delta chips and new color tokens;
+- the chart gradient and draw-in, plus the crosshair tooltip;
+- the price flash and digit roll (NumberFlow);
+- the trade form polish;
+- the wallet skeleton and row stagger;
+- Open Graph images and the 404 page;
+- the leaderboard highlight, the sparklines and the ticker tape;
+- the docs copy buttons and scroll reveal.
+
+The largest cost is on `/` (+6.5 KB gzip), which is NumberFlow plus the ticker's pause button. Every other route grew by less than 2 KB.
+
+### Lighthouse
+
+Lighthouse 13.5.0 with its default mobile settings (simulated throttling), against `next start` on localhost. Each cell is the median of 3 runs, picked by performance score. `/wallet` ran signed in as a test user.
+
+| Route | Performance | Accessibility | Best practices | LCP (ms) | TBT (ms) | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/` | 98 → 97 | 95 → 100 | 100 → 100 | 2,412 → 2,430 | 52 → 119 | 0 → 0 |
+| `/currency/usd-brl` | 98 → 97 | 96 → 100 | 100 → 100 | 2,415 → 2,572 | 53 → 56 | 0 → 0.035 |
+| `/wallet` | 98 → 98 | 96 → 100 | 100 → 100 | 2,428 → 2,424 | 60 → 57 | 0 → 0 |
+| `/backtest` | 96 → 97 | 100 → 100 | 100 → 100 | 2,566 → 2,571 | 106 → 56 | 0 → 0 |
+| `/docs/api` | 97 → 97 | 100 → 96 | 100 → 100 | 2,565 → 2,568 | 54 → 56 | 0 → 0 |
+
+How to read it:
+- **Performance** stayed between 96 and 98. LCP barely moved, because the large price and the headings never start hidden.
+- **TBT on `/`** went from 52 to 119 ms: the ticker and NumberFlow hydrate there. That is still well under the 200 ms "good" line.
+- **Accessibility went up to 100 on `/`, the currency page and the wallet.** Before, the plain green change text (`text-green-600` on white, 3.2:1) failed contrast; the delta chips fixed that.
+- **`/docs/api` dropped from 100 to 96.** This is a measurement artifact of the scroll reveal. Lighthouse checks contrast while the sections just below the fold are still mid-fade (partly transparent text reads as light gray). A reader scrolling the page sees them fully opaque.
