@@ -191,6 +191,24 @@ body {
   }
 }
 
+/* Docs sections fade up as they scroll in. Browsers without scroll timelines just show them */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
 /* Rows fade in one after another; the cap keeps long tables from waiting */
 @keyframes row-in {
   from {

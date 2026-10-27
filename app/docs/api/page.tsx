@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CopyButton } from "@/components/CopyButton";
 
 export const metadata: Metadata = { title: "API docs" };
 
@@ -266,7 +267,7 @@ Cache-Control: no-store`}</Code>
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="mt-10">
+    <section className="reveal mt-10">
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
     </section>
@@ -304,8 +305,11 @@ function Endpoint({
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="mt-2 overflow-x-auto rounded-xl bg-zinc-100 p-4 text-sm dark:bg-zinc-900">
-      <code>{children}</code>
-    </pre>
+    <div className="relative mt-2">
+      <pre className="overflow-x-auto rounded-xl bg-zinc-100 p-4 pr-20 text-sm dark:bg-zinc-900">
+        <code>{children}</code>
+      </pre>
+      <CopyButton text={children} />
+    </div>
   );
 }
