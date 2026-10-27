@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { AnimatedBRL } from "./AnimatedBRL";
 import { DeltaChip } from "./DeltaChip";
 import { FavoriteStar } from "./FavoriteStar";
-import { formatBRL } from "@/lib/format";
 
 // "type" describes the shape of the props, and TypeScript enforces it
 type QuoteCardProps = {
@@ -27,7 +27,9 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
         <FavoriteStar pair={pair} />
       </div>
 
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(price)}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums">
+        <AnimatedBRL value={price} />
+      </p>
 
       <p>
         <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>

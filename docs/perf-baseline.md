@@ -16,3 +16,15 @@ Client JavaScript each route loads (bootstrap chunks plus render-dependent chunk
 | `/docs/api` | 465,749 | 175,865 | 467,178 |
 
 This is the "before" number for the visual-polish round.
+
+## After: animated prices
+
+Date: 2026-10-26. Same toolchain for both rows. Each row sums the JS chunks listed for the route in `.next/diagnostics/route-bundle-stats.json` (Next's `firstLoadUncompressedJsBytes` is the same total). The gzip column gzips each chunk separately at level 9. This is not the analyzer's per-module estimate in the table above, so compare the two gzip columns only with each other.
+
+| Route | Client JS (bytes) | Client JS, gzip (bytes) |
+| --- | ---: | ---: |
+| `/` before (HEAD, `de33bcc`) | 468,880 | 140,047 |
+| `/` after (`AnimatedBRL` + `@number-flow/react` 0.6.2) | 486,888 | 145,809 |
+| delta | +18,008 | +5,762 |
+
+The NumberFlow path is in use (its server HTML carries the price as text and as an `aria-label`). Gate: at most about 15 KB gzip more on `/`, so +5.8 KB passes.

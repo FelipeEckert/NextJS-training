@@ -16,6 +16,8 @@
   --color-accent-hover: var(--accent-hover);
   --color-gain: var(--gain);
   --color-loss: var(--loss);
+  --animate-flash-up: flash-up 900ms ease-out;
+  --animate-flash-down: flash-down 900ms ease-out;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -59,6 +61,25 @@ body {
   }
   to {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Price flashes: a background tint that fades out, so the text itself never moves */
+@keyframes flash-up {
+  from {
+    background-color: color-mix(in oklab, var(--gain) 25%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-down {
+  from {
+    background-color: color-mix(in oklab, var(--loss) 25%, transparent);
+  }
+  to {
+    background-color: transparent;
   }
 }
 
