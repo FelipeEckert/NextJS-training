@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { ChartHover } from "@/components/ChartHover";
 import type { PricePoint } from "@/lib/analysis";
 import { buildAreaPath, buildLinePath } from "@/lib/chart";
 
@@ -12,55 +13,66 @@ export function PriceChart({ points, compare }: { points: PricePoint[]; compare?
   const last = points[points.length - 1];
   const isUp = last.close >= first.close;
   const closes = points.map((p) => p.close);
-  const values = compare ? [...closes, ...compare.map((p) => p.close)] : closes;
-  const domain: [number, number] | undefined = compare
-    ? [Math.min(...values), Math.max(...values)]
-    : undefined;
+  const compareCloses = compare?.map((p) => p.close);
+  const values = compareCloses ? [...closes, ...compareCloses] : closes;
+  const domain: [number, number] = [Math.min(...values), Math.max(...values)];
   const color = isUp ? "text-green-600" : "text-red-600";
+  const series = [
+    { label: compare ? "Strategy" : "Price", values: closes, colorClass: color },
+    ...(compareCloses ? [{ label: "Buy and hold", values: compareCloses, colorClass: "text-zinc-400" }] : []),
+  ];
   // Server components have useId too, and its id is unique per request, so two charts on one page never clash
   const gradientId = useId();
 
   return (
     <div className="mt-6">
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        preserveAspectRatio="none"
-        className="h-48 w-full"
-        role="img"
-        aria-label={`Price chart from ${first.date} to ${last.date}`}
-      >
-        <g className="chart-reveal">
-          {/* The stops carry the colour class: currentColor resolves on the stop, not on the filled path */}
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity={0.25} className={color} />
-            <stop offset="100%" stopColor="currentColor" stopOpacity={0} className={color} />
-          </linearGradient>
-          <path
-            d={buildAreaPath(closes, WIDTH, HEIGHT, domain)}
-            fill={`url(#${gradientId})`}
-            stroke="none"
-          />
-          {compare && (
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          preserveAspectRatio="none"
+          className="h-48 w-full"
+          role="img"
+          aria-label={`Price chart from ${first.date} to ${last.date}`}
+        >
+          <g className="chart-reveal">
+            {/* The stops carry the colour class: currentColor resolves on the stop, not on the filled path */}
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="currentColor" stopOpacity={0.25} className={color} />
+              <stop offset="100%" stopColor="currentColor" stopOpacity={0} className={color} />
+            </linearGradient>
             <path
-              d={buildLinePath(compare.map((p) => p.close), WIDTH, HEIGHT, domain)}
+              d={buildAreaPath(closes, WIDTH, HEIGHT, domain)}
+              fill={`url(#${gradientId})`}
+              stroke="none"
+            />
+            {compareCloses && (
+              <path
+                d={buildLinePath(compareCloses, WIDTH, HEIGHT, domain)}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                vectorEffect="non-scaling-stroke"
+                className="text-zinc-400"
+              />
+            )}
+            <path
+              d={buildLinePath(closes, WIDTH, HEIGHT, domain)}
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
-              strokeDasharray="4 4"
               vectorEffect="non-scaling-stroke"
-              className="text-zinc-400"
+              className={color}
             />
-          )}
-          <path
-            d={buildLinePath(closes, WIDTH, HEIGHT, domain)}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            vectorEffect="non-scaling-stroke"
-            className={color}
-          />
-        </g>
-      </svg>
+          </g>
+        </svg>
+        <ChartHover
+          dates={points.map((p) => p.date)}
+          series={series}
+          domain={domain}
+          ariaLabel="Chart values: use the arrow keys"
+        />
+      </div>
 
       <div className="mt-2 flex justify-between text-xs text-zinc-500 tabular-nums">
         <span>{first.date}</span>

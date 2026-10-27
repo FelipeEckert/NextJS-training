@@ -1,5 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { buildAreaPath, buildLinePath } from "./chart";
+import { buildAreaPath, buildLinePath, nearestIndex, scaleY } from "./chart";
+
+describe("scaleY", () => {
+  it("maps the domain's min to the bottom and max to the top", () => {
+    expect(scaleY(1, 50, [1, 3])).toBe(50);
+    expect(scaleY(3, 50, [1, 3])).toBe(0);
+    expect(scaleY(2, 50, [1, 3])).toBe(25);
+  });
+  it("puts a flat domain in the middle", () => {
+    expect(scaleY(5, 50, [5, 5])).toBe(25);
+  });
+});
+
+describe("nearestIndex", () => {
+  it("picks the index whose x is closest", () => {
+    expect(nearestIndex(0, 100, 5)).toBe(0);
+    expect(nearestIndex(100, 100, 5)).toBe(4);
+    expect(nearestIndex(49, 100, 5)).toBe(2);
+    expect(nearestIndex(51, 100, 5)).toBe(2);
+  });
+  it("clamps x positions outside the box", () => {
+    expect(nearestIndex(-20, 100, 5)).toBe(0);
+    expect(nearestIndex(150, 100, 5)).toBe(4);
+  });
+  it("returns 0 for a single point or a zero-width box", () => {
+    expect(nearestIndex(80, 100, 1)).toBe(0);
+    expect(nearestIndex(80, 0, 5)).toBe(0);
+  });
+});
 
 describe("buildLinePath", () => {
   it("scales values to the box (higher value = smaller y)", () => {
