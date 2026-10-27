@@ -68,7 +68,8 @@ export default async function Image({ params }: { params: Promise<{ pair: string
         </div>
 
         {summary && (
-          <svg width={1056} height={180} viewBox="0 0 1056 180">
+          // Padded by half the stroke, so the line's peaks aren't clipped at the edges
+          <svg width={1056} height={180} viewBox="-3 -3 1062 186">
             <path
               d={buildLinePath(closes, 1056, 180)}
               fill="none"
