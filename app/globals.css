@@ -3,11 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: var(--color-indigo-600);
+  --accent-hover: var(--color-indigo-700);
+  --gain: var(--color-green-800);
+  --loss: var(--color-red-700);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,13 +24,16 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --accent-hover: var(--color-indigo-500);
+    --gain: var(--color-green-400);
+    --loss: var(--color-red-400);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Visitors who ask for less motion get instant changes: no slides, no draw-ins, no view-transition animations */

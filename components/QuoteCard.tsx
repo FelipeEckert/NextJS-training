@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeltaChip } from "./DeltaChip";
 import { FavoriteStar } from "./FavoriteStar";
 import { formatBRL } from "@/lib/format";
 
@@ -12,7 +13,9 @@ type QuoteCardProps = {
 
 // Props arrive as one object, which we destructure right in the parameter
 export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
-  const isUp = change >= 0;
+  // Rounded like the text, so the arrow and the sign never disagree with the number shown
+  const shown = Number(change.toFixed(2));
+  const sign = shown > 0 ? "+" : "";
 
   return (
     <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
@@ -26,9 +29,8 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
 
       <p className="mt-1 text-2xl font-semibold tabular-nums">{formatBRL(price)}</p>
 
-      {/* Conditional rendering with a ternary: condition ? if true : if false */}
-      <p className={isUp ? "text-green-600" : "text-red-600"}>
-        {isUp ? "▲" : "▼"} {change.toFixed(2)}%
+      <p>
+        <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>
       </p>
     </div>
   );

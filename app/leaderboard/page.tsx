@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { DeltaChip } from "@/components/DeltaChip";
 import { formatBRL } from "@/lib/format";
 import { rankWallets } from "@/lib/leaderboard";
 import { getAllWallets } from "@/lib/leaderboard-data";
@@ -76,7 +77,7 @@ async function LeaderboardTable() {
                 </td>
                 <td className="py-2 pr-4">{formatBRL(row.totalCents / 100)}</td>
                 <td className="py-2">
-                  <span className={gainClass(shown)}>{`${plus(shown)}${shown.toFixed(2)}%`}</span>
+                  <DeltaChip value={shown}>{`${plus(shown)}${shown.toFixed(2)}%`}</DeltaChip>
                 </td>
               </tr>
             );
@@ -90,10 +91,4 @@ async function LeaderboardTable() {
 // Show "+" only for a real gain, so a flat result reads as zero
 function plus(value: number) {
   return value > 0 ? "+" : "";
-}
-
-function gainClass(value: number) {
-  if (value > 0) return "text-green-600";
-  if (value < 0) return "text-red-600";
-  return "";
 }
