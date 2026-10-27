@@ -73,4 +73,6 @@ How to read it:
 - **Performance** stayed between 96 and 98. LCP barely moved, because the large price and the headings never start hidden.
 - **TBT on `/`** went from 52 to 119 ms: the ticker and NumberFlow hydrate there. That is still well under the 200 ms "good" line.
 - **Accessibility went up to 100 on `/`, the currency page and the wallet.** Before, the plain green change text (`text-green-600` on white, 3.2:1) failed contrast; the delta chips fixed that.
-- **`/docs/api` dropped from 100 to 96.** This is a measurement artifact of the scroll reveal. Lighthouse checks contrast while the sections just below the fold are still mid-fade (partly transparent text reads as light gray). A reader scrolling the page sees them fully opaque.
+- **`/docs/api` first dropped from 100 to 96.** Lighthouse checks contrast while the sections just below the fold are mid-fade, and partly transparent text reads as light gray.
+  - #60 changed the reveal to movement only (`translate`, no `opacity`), so text is at full contrast at every point of the scroll.
+  - Re-measured on that build: **performance 97, accessibility 100, best practices 100**, LCP 2,574 ms, TBT 75 ms and CLS 0, with no failing accessibility audits.
