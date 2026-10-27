@@ -15,7 +15,7 @@ export function HomeHero() {
         <span aria-hidden="true" className="size-1.5 rounded-full bg-green-500" /> Live quotes · Paper trading
       </p>
       <h1 className="mt-5 max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-        Paper-trade currencies <span className="text-brand">in BRL</span>
+        Paper-trade currencies <span className="text-brand whitespace-nowrap">in BRL</span>
       </h1>
       <p className="mt-4 max-w-xl text-lg text-zinc-600 dark:text-zinc-400">
         Start with R$ 100,000 of virtual cash. Trade 52 currencies and crypto at live prices, backtest a strategy and climb the leaderboard.
