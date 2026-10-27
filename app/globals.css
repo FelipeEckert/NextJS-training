@@ -1,6 +1,9 @@
 @import "tailwindcss";
+/* dark: follows the data-theme the inline script in app/layout.tsx sets, not the media query */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
   --accent: var(--color-indigo-600);
@@ -35,16 +38,15 @@
   color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --accent-hover: var(--color-indigo-500);
-    --brand-text-from: var(--color-indigo-400);
-    --brand-text-to: var(--color-violet-400);
-    --gain: var(--color-green-400);
-    --loss: var(--color-red-400);
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --accent-hover: var(--color-indigo-500);
+  --brand-text-from: var(--color-indigo-400);
+  --brand-text-to: var(--color-violet-400);
+  --gain: var(--color-green-400);
+  --loss: var(--color-red-400);
 }
 
 body {
@@ -230,12 +232,10 @@ body {
   --globe-grid: .22; --globe-land: .3; --globe-coast: .6; --globe-limb: .22; --globe-atmos: .2; --globe-rim: .75;
   --globe-flow-out: #6366f1; --globe-flow-in: #f59e0b; --globe-hub: #22c55e; --globe-label: #334155;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --globe-sphere-hi: rgb(148 163 184 / .16); --globe-sphere-mid: rgb(30 41 59 / .3); --globe-sphere-lo: rgb(15 23 42 / .5);
-    --globe-grid: .16; --globe-land: .4; --globe-coast: .75; --globe-limb: .35; --globe-atmos: .3; --globe-rim: .9;
-    --globe-label: #e2e8f0;
-  }
+:root[data-theme="dark"] {
+  --globe-sphere-hi: rgb(148 163 184 / .16); --globe-sphere-mid: rgb(30 41 59 / .3); --globe-sphere-lo: rgb(15 23 42 / .5);
+  --globe-grid: .16; --globe-land: .4; --globe-coast: .75; --globe-limb: .35; --globe-atmos: .3; --globe-rim: .9;
+  --globe-label: #e2e8f0;
 }
 /* Fades the globe away from the headline, so the text keeps its contrast */
 .hero-globe {
@@ -246,9 +246,7 @@ body {
   background-image: linear-gradient(135deg, rgb(99 102 241 / .7), rgb(203 213 225 / .7) 45%, rgb(56 189 248 / .55));
   box-shadow: 0 24px 60px -22px rgb(30 41 59 / .45), 0 0 0 6px rgb(99 102 241 / .05);
 }
-@media (prefers-color-scheme: dark) {
-  .hero-wallet-ring { background-image: linear-gradient(135deg, rgb(99 102 241 / .7), rgb(71 85 105 / .6) 45%, rgb(56 189 248 / .55)); }
-}
+[data-theme="dark"] .hero-wallet-ring { background-image: linear-gradient(135deg, rgb(99 102 241 / .7), rgb(71 85 105 / .6) 45%, rgb(56 189 248 / .55)); }
 /* A wide, smoky band of light sweeps the order card's border left to right, then rests */
 @property --sweep { syntax: '<percentage>'; inherits: false; initial-value: -60%; }
 @keyframes beam-sweep { 0% { --sweep: -60%; } 65% { --sweep: 160%; } 100% { --sweep: 160%; } }
@@ -261,7 +259,7 @@ body {
   opacity: .6;
   animation: beam-sweep 8.5s cubic-bezier(.45, 0, .25, 1) infinite;
 }
-@media (prefers-color-scheme: dark) { .sheen { opacity: .12; } }
+[data-theme="dark"] .sheen { opacity: .12; }
 /* Light streaks travel the cash-flow arcs; "in" runs back toward São Paulo */
 @keyframes streak { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
 .streak { stroke-dasharray: 8 92; animation: streak 4.4s linear infinite; }
