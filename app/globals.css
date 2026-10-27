@@ -310,3 +310,9 @@ body {
     animation-play-state: paused;
   }
 }
+
+/* Backtest form: only the chosen strategy's settings show; "Compare all" shows both. CSS only, so the GET form works without JS */
+.backtest-form:not(:has(select[name="kind"] option:is([value="dip"], [value="compare"]):checked)) [data-strategy="dip"],
+.backtest-form:not(:has(select[name="kind"] option:is([value="ma"], [value="compare"]):checked)) [data-strategy="ma"] {
+  display: none;
+}
