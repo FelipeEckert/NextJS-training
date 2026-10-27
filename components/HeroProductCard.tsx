@@ -20,8 +20,8 @@ export async function HeroProductCard() {
   const bought = (100 / quote.price).toFixed(2);
 
   return (
-    <div aria-hidden="true" inert className="relative hidden h-[440px] lg:block">
-      <div className="hero-wallet-ring absolute right-0 top-3 w-[290px] rotate-[4deg] rounded-[19px] p-px">
+    <div aria-hidden="true" inert className="relative hidden h-[470px] lg:block">
+      <div className="hero-wallet-ring absolute -right-2 top-0 w-[280px] rotate-[4deg] rounded-[19px] p-px">
         <div className="rounded-[18px] bg-background p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-500">Your wallet</span>
@@ -45,7 +45,7 @@ export async function HeroProductCard() {
         </div>
       </div>
 
-      <div className="beam absolute left-0 top-[70px] w-[380px] -rotate-2 rounded-[22px] bg-zinc-200 p-[1.5px] shadow-[0_30px_70px_-30px_rgba(79,70,229,0.45)] dark:bg-zinc-800">
+      <div className="beam absolute -left-2 top-[118px] w-[360px] -rotate-2 rounded-[22px] bg-zinc-200 p-[1.5px] shadow-[0_30px_70px_-30px_rgba(79,70,229,0.45)] dark:bg-zinc-800">
         <div className="relative overflow-hidden rounded-[20.5px] bg-background/85 p-6 backdrop-blur-md">
           <div className="sheen pointer-events-none absolute inset-0" />
           <div className="flex items-center justify-between">

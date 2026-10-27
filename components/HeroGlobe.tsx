@@ -26,6 +26,9 @@ export function HeroGlobe() {
 
     const el = (id: string) => root.querySelector(`[data-g="${id}"]`);
     const arcs = Array.from({ length: 12 }, (_, i) => [el(`arc-${i}`), el(`out-${i}`), i < 6 ? el(`in-${i}`) : null]);
+    const land = el("land");
+    const coast = el("coast");
+    const grid = el("grid");
     const cities = el("cities");
     const hub = el("hub");
     const label = el("hub-label");
@@ -49,15 +52,23 @@ export function HeroGlobe() {
       lonRef.current = lon0;
 
       const f = globeFrame(lon0);
+      land?.setAttribute("d", f.land);
+      coast?.setAttribute("d", f.coast);
+      grid?.setAttribute("d", f.grid);
       arcs.forEach((group, i) => group.forEach((node) => node?.setAttribute("d", f.arcs[i])));
       cities?.setAttribute("d", f.cities);
       hub?.setAttribute("d", hubPath(f.hub));
       label?.setAttribute("x", String(f.hub ? f.hub.x + 12 : -100));
       label?.setAttribute("y", String(f.hub ? f.hub.y + 26 : -100));
     };
-    frame = requestAnimationFrame(tick);
+    // Start once the page is idle, so first paint and hydration never share the main thread with the globe
+    const begin = () => { last = performance.now(); frame = requestAnimationFrame(tick); };
+    const idle = "requestIdleCallback" in window ? window.requestIdleCallback(begin, { timeout: 3000 }) : 0;
+    const timer = idle ? 0 : window.setTimeout(begin, 1500);
 
     return () => {
+      if (idle) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
       cancelAnimationFrame(frame);
       observer.disconnect();
     };

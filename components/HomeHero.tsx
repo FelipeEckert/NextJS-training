@@ -10,7 +10,7 @@ export function HomeHero() {
   return (
     <HeroMotion>
       <HeroGlobe />
-      <div className="relative grid items-center gap-10 px-6 py-14 sm:px-12 lg:min-h-[520px] lg:grid-cols-2">
+      <div className="relative grid items-center gap-10 px-6 pb-20 pt-14 sm:px-12 lg:min-h-[540px] lg:grid-cols-2 lg:py-14">
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-background/60 px-3 py-1 text-xs font-medium text-zinc-600 backdrop-blur dark:border-zinc-800 dark:text-zinc-400">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-green-500" /> Live quotes · Paper trading
@@ -25,7 +25,7 @@ export function HomeHero() {
             <HeroActions />
           </Suspense>
         </div>
-        <Suspense fallback={<div className="hidden h-[440px] lg:block" />}>
+        <Suspense fallback={<div className="hidden h-[470px] lg:block" />}>
           <HeroProductCard />
         </Suspense>
       </div>
