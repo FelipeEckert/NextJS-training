@@ -2,6 +2,21 @@
 
 const round1 = (n: number) => Number(n.toFixed(1));
 
+// Maps a value to a y coordinate: higher values sit nearer the top (smaller y)
+export function scaleY(value: number, height: number, domain: [min: number, max: number]): number {
+  const [min, max] = domain;
+  // A flat domain has no range to scale against, so it goes in the middle
+  return max === min ? height / 2 : height - ((value - min) / (max - min)) * height;
+}
+
+// Maps a pointer x position to the nearest data index
+export function nearestIndex(x: number, width: number, count: number): number {
+  // A single point, or a zero-width box, has nothing to pick between
+  if (count <= 1 || width <= 0) return 0;
+  const index = Math.round((x / width) * (count - 1));
+  return Math.min(count - 1, Math.max(0, index));
+}
+
 // A shared domain lets two lines be compared on the same scale
 export function buildLinePath(
   values: number[],
@@ -18,8 +33,7 @@ export function buildLinePath(
     .map((v, i) => {
       // A single value has no x spacing, so it sits at the left edge
       const x = last === 0 ? 0 : (i / last) * width;
-      // A flat line has no range to scale against, so it goes in the middle
-      const y = max === min ? height / 2 : height - ((v - min) / (max - min)) * height;
+      const y = scaleY(v, height, [min, max]);
       return `${i === 0 ? "M" : "L"}${round1(x)},${round1(y)}`;
     })
     .join(" ");

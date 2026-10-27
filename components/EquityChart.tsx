@@ -1,3 +1,4 @@
+import { ChartHover } from "@/components/ChartHover";
 import type { PricePoint } from "@/lib/analysis";
 import { buildLinePath } from "@/lib/chart";
 
@@ -24,27 +25,39 @@ export function EquityChart({ series }: { series: { label: string; points: Price
 
   return (
     <div className="mt-6">
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        preserveAspectRatio="none"
-        className="h-48 w-full"
-        role="img"
-        aria-label={`Equity of ${list} from ${first.date} to ${last.date}`}
-      >
-        {series.map((s, i) => (
-          <g key={s.label} className="chart-reveal" style={{ animationDelay: `${i * 120}ms` }}>
-            <path
-              d={buildLinePath(s.points.map((p) => p.close), WIDTH, HEIGHT, domain)}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeDasharray={STYLES[i].dash}
-              vectorEffect="non-scaling-stroke"
-              className={STYLES[i].color}
-            />
-          </g>
-        ))}
-      </svg>
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          preserveAspectRatio="none"
+          className="h-48 w-full"
+          role="img"
+          aria-label={`Equity of ${list} from ${first.date} to ${last.date}`}
+        >
+          {series.map((s, i) => (
+            <g key={s.label} className="chart-reveal" style={{ animationDelay: `${i * 120}ms` }}>
+              <path
+                d={buildLinePath(s.points.map((p) => p.close), WIDTH, HEIGHT, domain)}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeDasharray={STYLES[i].dash}
+                vectorEffect="non-scaling-stroke"
+                className={STYLES[i].color}
+              />
+            </g>
+          ))}
+        </svg>
+        <ChartHover
+          dates={points.map((p) => p.date)}
+          series={series.map((s, i) => ({
+            label: s.label,
+            values: s.points.map((p) => p.close),
+            colorClass: STYLES[i].color,
+          }))}
+          domain={domain}
+          ariaLabel="Chart values: use the arrow keys"
+        />
+      </div>
 
       <div className="mt-2 flex justify-between text-xs text-zinc-500 tabular-nums">
         <span>{first.date}</span>
