@@ -7,6 +7,7 @@ import { rankWallets } from "@/lib/leaderboard";
 import { getAllWallets } from "@/lib/leaderboard-data";
 import { parseDecimal, QTY_SCALE } from "@/lib/money";
 import { HOUSE_BOT_USERNAME } from "@/lib/house-bot";
+import { getCurrentUser } from "@/lib/session";
 import { getQuotes } from "@/lib/quotes";
 
 export const metadata: Metadata = { title: "Leaderboard" };
@@ -26,7 +27,7 @@ const UNAVAILABLE = <p className="mt-6 text-zinc-500">Leaderboard temporarily un
 
 async function LeaderboardTable() {
   await connection(); // the DB driver draws random bytes; defer them to request time
-  const wallets = await getAllWallets();
+  const [wallets, user] = await Promise.all([getAllWallets(), getCurrentUser()]);
   if (wallets.length === 0) return <p className="mt-6 text-zinc-500">No traders yet.</p>;
 
   // Prices only for pairs somebody holds. If the quote API is down, the leaderboard is unavailable
@@ -64,11 +65,13 @@ async function LeaderboardTable() {
           {ranked.map((row, index) => {
             // Round first, so a tiny negative return shows as flat instead of "-0.00%"
             const shown = Number(row.returnPct.toFixed(2));
+            const isMe = user?.username === row.username;
             return (
               <tr
                 key={row.username}
-                className="stagger-row border-t border-zinc-200 dark:border-zinc-800"
+                className={`stagger-row border-t border-zinc-200 dark:border-zinc-800${isMe ? " bg-indigo-50 dark:bg-indigo-950/40" : ""}`}
                 style={{ "--i": index } as CSSProperties}
+                aria-current={isMe ? "true" : undefined}
               >
                 <td className="py-2 pr-4">{index + 1}</td>
                 <td className="py-2 pr-4 font-medium">
@@ -76,6 +79,11 @@ async function LeaderboardTable() {
                   {row.username === HOUSE_BOT_USERNAME && (
                     <span className="ml-2 rounded border border-zinc-300 px-1.5 py-0.5 text-xs font-normal text-zinc-500 dark:border-zinc-700">
                       bot
+                    </span>
+                  )}
+                  {isMe && (
+                    <span className="ml-2 rounded border border-indigo-300 px-1.5 py-0.5 text-xs font-normal text-indigo-700 dark:border-indigo-700 dark:text-indigo-300">
+                      you
                     </span>
                   )}
                 </td>
