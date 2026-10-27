@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { AnimatedBRL } from "./AnimatedBRL";
 import { DeltaChip } from "./DeltaChip";
 import { FavoriteStar } from "./FavoriteStar";
+import { Sparkline } from "./Sparkline";
 
 // "type" describes the shape of the props, and TypeScript enforces it
 type QuoteCardProps = {
@@ -38,6 +40,11 @@ export function QuoteCard({ pair, currency, price, change }: QuoteCardProps) {
       <p>
         <DeltaChip value={shown}>{`${sign}${shown.toFixed(2)}%`}</DeltaChip>
       </p>
+
+      {/* Streams in after the card, so a slow history call never delays the prices */}
+      <Suspense fallback={<div className="mt-3 h-10" aria-hidden="true" />}>
+        <Sparkline pair={pair} />
+      </Suspense>
     </div>
   );
 }
