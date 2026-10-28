@@ -21,7 +21,13 @@ const json = (body: unknown, status = 200) => Response.json(body, { status });
 const apiError = (status: number, code: string, message: string) =>
   json({ error: { code, message } }, status);
 
-type Call = { method: string; path: string; headers: Headers; body: unknown };
+type Call = {
+  method: string;
+  path: string;
+  headers: Headers;
+  body: unknown;
+  redirect: RequestRedirect | undefined;
+};
 
 // A fake fetch: records every call and answers with the handler's response
 function fakeFetch(handler: (method: string, path: string) => Response) {
@@ -34,6 +40,7 @@ function fakeFetch(handler: (method: string, path: string) => Response) {
       path: url.pathname,
       headers: new Headers(init.headers),
       body: typeof init.body === "string" ? JSON.parse(init.body) : undefined,
+      redirect: init.redirect,
     });
     return handler(method, url.pathname);
   };
@@ -146,6 +153,24 @@ describe("runHouseBot", () => {
     expect(results[0].detail).toBe("401 UNAUTHORIZED: Missing or invalid API key.");
     expect(calls.some((call) => call.method === "POST")).toBe(false);
     expect(JSON.stringify(results)).not.toContain(KEY);
+  });
+
+  it("reports a redirect instead of following it", async () => {
+    const { send, calls } = fakeFetch(
+      () => new Response(null, { status: 307, headers: { location: "https://vercel.com/sso" } }),
+    );
+
+    const results = await run(send);
+
+    expect(results).toEqual(
+      HOUSE_BOT_PAIRS.map((pair) => ({
+        pair,
+        action: "error",
+        detail: "307 redirected to https://vercel.com/sso",
+      })),
+    );
+    expect(calls).toHaveLength(1);
+    expect(calls[0].redirect).toBe("manual");
   });
 
   it("sells the whole position when holding and the signal is falling", async () => {
