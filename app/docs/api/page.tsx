@@ -260,6 +260,12 @@ Cache-Control: no-store`}</Code>
           (<code>lib/house-bot.ts</code> in the repository). It appears on the leaderboard with a
           &quot;bot&quot; tag.
         </p>
+        <p className="mt-3">
+          A second bot, random_bot, flips a coin for each pair every day (<code>lib/random-bot.ts</code>
+          ): heads it holds the currency, tails it stays in cash. It is the control group the
+          moving-average strategy should beat; the coin is seeded by the date and pair, so a re-run the
+          same day changes nothing.
+        </p>
       </Section>
     </main>
   );
