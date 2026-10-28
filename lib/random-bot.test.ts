@@ -58,6 +58,14 @@ describe("coinFlip", () => {
     expect(heads).toBeGreaterThanOrEqual(450);
     expect(heads).toBeLessThanOrEqual(550);
   });
+
+  it("flips each pair independently", () => {
+    const sameSide = Array.from({ length: 1000 }, (_, n) => isoDay(day(n))).filter(
+      (date) => coinFlip(`${date}-USD-BRL`) === coinFlip(`${date}-EUR-BRL`),
+    ).length;
+    expect(sameSide).toBeGreaterThanOrEqual(430);
+    expect(sameSide).toBeLessThanOrEqual(570);
+  });
 });
 
 describe("decideRandom", () => {
