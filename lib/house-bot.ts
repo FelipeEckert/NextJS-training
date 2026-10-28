@@ -5,9 +5,11 @@ export const HOUSE_BOT_USERNAME = "house_bot";
 export const HOUSE_BOT_PAIRS = ["USD-BRL", "EUR-BRL", "GBP-BRL", "BTC-BRL"];
 export const HOUSE_BOT_BUY_BRL = "10000.00";
 
+export type BotAction = "buy" | "sell" | "hold";
+
 export type HouseBotResult = {
   pair: string;
-  action: "buy" | "sell" | "hold" | "error";
+  action: BotAction | "error";
   detail: string;
 };
 
@@ -15,7 +17,7 @@ type Trade = { side: string; quantity: string; price: string; total: string };
 type Outcome<T> = { ok: true; status: number; data: T } | { ok: false; detail: string };
 
 // Same rule as examples/bot.py: 5-day vs 20-day mean of closes, oldest first
-export function decide(closes: number[], holding: boolean): "buy" | "sell" | "hold" {
+export function decide(closes: number[], holding: boolean): BotAction {
   if (closes.length < 20) return "hold";
   const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
   const short = mean(closes.slice(-5));
@@ -60,8 +62,15 @@ export async function runHouseBot(opts: {
   apiKey: string;
   now: Date;
   fetch: typeof fetch;
+  decide?: (input: { closes: number[]; holding: boolean; pair: string; now: Date }) => BotAction;
 }): Promise<HouseBotResult[]> {
-  const { baseUrl, apiKey, now, fetch: send } = opts;
+  const {
+    baseUrl,
+    apiKey,
+    now,
+    fetch: send,
+    decide: strategy = ({ closes, holding }) => decide(closes, holding),
+  } = opts;
   const headers = { Authorization: `Bearer ${apiKey}` };
 
   const wallet = await call<{ positions: { pair: string }[] }>(send, `${baseUrl}/api/v1/wallet`, {
@@ -83,7 +92,8 @@ export async function runHouseBot(opts: {
     }
 
     const holding = wallet.data.positions.some((position) => position.pair === pair);
-    const action = decide(history.data.map((point) => point.close), holding);
+    const closes = history.data.map((point) => point.close);
+    const action = strategy({ closes, holding, pair, now });
     if (action === "hold") {
       results.push({ pair, action, detail: "no signal" });
       continue;

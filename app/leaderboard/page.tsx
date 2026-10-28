@@ -8,6 +8,7 @@ import { rankWallets } from "@/lib/leaderboard";
 import { getAllWallets } from "@/lib/leaderboard-data";
 import { parseDecimal, QTY_SCALE } from "@/lib/money";
 import { HOUSE_BOT_USERNAME } from "@/lib/house-bot";
+import { RANDOM_BOT_USERNAME } from "@/lib/random-bot";
 import { getCurrentUser } from "@/lib/session";
 import { getQuotes } from "@/lib/quotes";
 
@@ -82,7 +83,8 @@ async function LeaderboardTable() {
                 <td className="py-2 pr-4">{index + 1}</td>
                 <td className="py-2 pr-4 font-medium">
                   {row.username}
-                  {row.username === HOUSE_BOT_USERNAME && (
+                  {(row.username === HOUSE_BOT_USERNAME ||
+                    row.username === RANDOM_BOT_USERNAME) && (
                     <span className="ml-2 rounded border border-zinc-300 px-1.5 py-0.5 text-xs font-normal text-zinc-500 dark:border-zinc-700">
                       bot
                     </span>
