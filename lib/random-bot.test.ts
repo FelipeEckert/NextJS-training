@@ -12,7 +12,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status });
 type Call = { method: string; path: string; body: unknown };
 
 // A fake fetch: records every call and answers with the handler's response
-function fakeFetch(handler: (method: string, path: string) => Response) {
+function fakeFetch(handler: (path: string) => Response) {
   const calls: Call[] = [];
   const send = async (input: string | URL | Request, init: RequestInit = {}) => {
     const url = new URL(String(input));
@@ -22,7 +22,7 @@ function fakeFetch(handler: (method: string, path: string) => Response) {
       path: url.pathname,
       body: typeof init.body === "string" ? JSON.parse(init.body) : undefined,
     });
-    return handler(method, url.pathname);
+    return handler(url.pathname);
   };
   return { send: send as typeof fetch, calls };
 }
@@ -76,20 +76,23 @@ describe("decideRandom", () => {
     expect(decideRandom({ holding: false, pair: PAIR, now: heads })).toBe("buy");
   });
 
-  it("sells on heads when holding", () => {
-    expect(decideRandom({ holding: true, pair: PAIR, now: heads })).toBe("sell");
+  it("holds on heads when holding", () => {
+    expect(decideRandom({ holding: true, pair: PAIR, now: heads })).toBe("hold");
   });
 
-  it("holds on tails, holding or not", () => {
+  it("sells on tails when holding", () => {
+    expect(decideRandom({ holding: true, pair: PAIR, now: tails })).toBe("sell");
+  });
+
+  it("holds on tails when not holding", () => {
     expect(decideRandom({ holding: false, pair: PAIR, now: tails })).toBe("hold");
-    expect(decideRandom({ holding: true, pair: PAIR, now: tails })).toBe("hold");
   });
 });
 
 describe("runHouseBot with decideRandom", () => {
   it("buys USD-BRL on a heads day with an empty wallet", async () => {
     const now = dayWhere(true);
-    const { send, calls } = fakeFetch((method, path) => {
+    const { send, calls } = fakeFetch((path) => {
       if (path === "/api/v1/wallet") return walletEmpty();
       if (path.startsWith("/api/v1/history/")) return risingHistory();
       return trade();
@@ -102,5 +105,21 @@ describe("runHouseBot with decideRandom", () => {
     );
     expect(order?.path).toBe("/api/v1/orders");
     expect(order?.body).toEqual({ pair: PAIR, side: "buy", brl: HOUSE_BOT_BUY_BRL });
+  });
+
+  it("makes no USD-BRL order on a same-day re-run after the buy", async () => {
+    const now = dayWhere(true);
+    const { send, calls } = fakeFetch((path) => {
+      if (path === "/api/v1/wallet") return json({ data: { positions: [{ pair: PAIR }] } });
+      if (path.startsWith("/api/v1/history/")) return risingHistory();
+      return trade();
+    });
+
+    await runHouseBot({ baseUrl: BASE, apiKey: KEY, now, fetch: send, decide: decideRandom });
+
+    const orders = calls.filter(
+      (call) => call.method === "POST" && (call.body as { pair?: string })?.pair === PAIR,
+    );
+    expect(orders).toEqual([]);
   });
 });
