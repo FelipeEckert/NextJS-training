@@ -35,7 +35,7 @@ export function idempotencyKey(pair: string, now: Date): string {
 async function call<T>(send: typeof fetch, url: string, init: RequestInit): Promise<Outcome<T>> {
   let res: Response;
   try {
-    res = await send(url, { ...init, signal: AbortSignal.timeout(10_000) });
+    res = await send(url, { ...init, signal: AbortSignal.timeout(10_000), redirect: "manual" });
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : String(error) };
   }
@@ -48,6 +48,9 @@ async function call<T>(send: typeof fetch, url: string, init: RequestInit): Prom
   }
   if (body?.error) {
     return { ok: false, detail: `${res.status} ${body.error.code}: ${body.error.message}` };
+  }
+  if (res.status >= 300 && res.status < 400) {
+    return { ok: false, detail: `${res.status} redirected to ${res.headers.get("location") ?? "?"}` };
   }
   return { ok: false, detail: String(res.status) };
 }

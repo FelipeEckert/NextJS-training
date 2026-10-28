@@ -15,9 +15,12 @@ export async function GET(request: Request) {
   const apiKey = process.env.HOUSE_BOT_API_KEY;
   if (!apiKey) return apiError(500, "NOT_CONFIGURED", "HOUSE_BOT_API_KEY is not set.");
 
-  // Calls the app's own public API at this origin, so the bot trades like any user's bot
+  // Vercel Cron calls the deployment URL, which Deployment Protection guards; the production domain is public
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL; // Vercel system variable, no protocol
+
+  // Calls the app's own public API, so the bot trades like any user's bot
   const results = await runHouseBot({
-    baseUrl: new URL(request.url).origin,
+    baseUrl: host ? `https://${host}` : new URL(request.url).origin,
     apiKey,
     now: new Date(),
     fetch,
