@@ -1,6 +1,6 @@
 # Demo script
 
-A 5-minute walkthrough for showing the project live.
+A 6-minute walkthrough for showing the project live.
 
 **Live app:** https://next-js-training-ten-gamma.vercel.app
 
@@ -20,12 +20,11 @@ Steps 1 to 6 run in the normal window, signed in to the shared demo. Step 7 runs
 
 ### 1. Home, sign in, demo wallet (about 30 s)
 
-1. Point at the hero: the order card shows the live USD price, its 30-day chart and a buy computed at that price, over a spinning cash-flow globe. The "Pause animation" button stops all motion.
-2. Open the live URL and point at the live rates on the home page.
+1. Open the live URL and point at the hero: the order card shows the live USD price, its 30-day chart and a buy computed at that price, over a spinning cash-flow globe. The "Pause animation" button stops all motion.
+2. Point at the live rates below the hero.
 3. Click **Sign in** (top right), then **Try the demo**. You land on `/wallet`.
 
-> "Every account starts with R$ 100,000 of virtual cash. The demo account is shared, so one click is enough, with no password."
-> The hero cards are rendered on the server with the same quote cache as the rest of the page.
+> "Every account starts with R$ 100,000 of virtual cash. The demo account is shared, so one click is enough, with no password. The hero cards are rendered on the server with the same quote cache as the rest of the page."
 
 Code: `app/page.tsx`, `app/login/page.tsx`, `app/auth-actions.ts` (`tryDemo`), `lib/users.ts` (`ensureDemoUser`), `components/HomeHero.tsx`, `components/HeroProductCard.tsx`, `components/HeroGlobe.tsx`.
 
@@ -116,10 +115,10 @@ Code: `app/settings/api-keys/page.tsx`, `components/NewApiKeyForm.tsx`, `app/api
 
 ### 8. CI and deploys (about 30 s)
 
-1. Open the pull request. Show the four jobs: checks (lint, typecheck, unit tests, build), db (database tests on Postgres 17), smoke (the app running against seeded data, with its key pages requested) and e2e (Playwright clicks through sign-up, buy, sell and reset).
+1. Open the pull request. Show the four jobs: `checks` (lint, typecheck, unit tests, build), `db` (database tests on Postgres 17), `smoke` (the app running against seeded data, with its key pages requested) and `e2e` (Playwright clicks through sign-up, buy, sell and reset).
 2. Open the Vercel preview link on the pull request.
 
-> "Merging to main deploys production. Branch protection, set in GitHub, requires a pull request, the checks, db and smoke jobs, and a squash merge. Migrations run before the new code goes live."
+> "Merging to main deploys production. Branch protection, set in GitHub, requires a pull request, the `checks`, `db` and `smoke` jobs, and a squash merge. Migrations run before the new code goes live."
 
 Code: `.github/workflows/ci.yml`, `vercel.json` (build runs `db:migrate` first), `scripts/smoke.mjs`.
 
